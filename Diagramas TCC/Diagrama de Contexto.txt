@@ -1,0 +1,53 @@
+workspace "Sistema de Gerenciamento de Zoológico" "Sistema acadêmico para controle interno do zoológico" {
+
+    model {
+
+        funcionario = person "Funcionário" {
+            description "Gerencia animais, habitats e estoque."
+        }
+
+        administrador = person "Administrador" {
+            description "Administra usuários e configurações."
+        }
+
+        sistemaZoo = softwareSystem "Sistema de Gerenciamento do Zoológico" {
+            description "Sistema interno para gestão operacional do zoológico."
+
+            webapp = container "Aplicação Web" {
+                technology "HTML, CSS, JavaScript"
+                description "Interface utilizada pelos usuários do sistema."
+            }
+
+            api = container "API Backend" {
+                technology "Spring Boot"
+                description "Responsável pelas regras de negócio e processamento das informações."
+            }
+
+            database = container "Banco de Dados" {
+                technology "MySQL"
+                description "Armazena dados de animais, habitats, estoque e usuários."
+            }
+
+            webapp -> api "Realiza chamadas HTTP/JSON"
+            api -> database "Lê e grava dados via JPA/Hibernate"
+        }
+
+        funcionario -> sistemaZoo "Utiliza o sistema"
+        administrador -> sistemaZoo "Administra o sistema"
+    }
+
+    views {
+
+        systemContext sistemaZoo {
+            include *
+            autolayout lr
+        }
+
+        container sistemaZoo {
+            include *
+            autolayout lr
+        }
+
+        theme default
+    }
+}
