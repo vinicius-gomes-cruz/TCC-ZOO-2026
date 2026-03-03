@@ -55,6 +55,7 @@ O projeto segue o **C4 Model**, com ênfase nos níveis:
 ---
 
 ### C3 – Componentes da API (Spring Boot)
+
 com.zoologico
 ├── controller
 │ ├── AnimalController
