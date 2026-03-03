@@ -1,6 +1,6 @@
 # 🐾 Sistema de Gerenciamento de Zoológico
 
-Sistema acadêmico para gerenciamento interno de zoológicos, com controle de **animais**, **habitats** e **estoque**.  
+Sistema acadêmico para gerenciamento interno do zoológico de cascavel, com controle de **animais**, **habitats** e **estoque**.  
 Desenvolvido com **Spring Boot**, **MySQL**, **JPA/Hibernate**, **JWT** e documentação via **Swagger**.
 
 ---
