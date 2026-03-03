@@ -1,7 +1,7 @@
 # 🐾 Sistema de Gerenciamento de Zoológico
 
 Sistema acadêmico para gerenciamento interno do zoológico de cascavel, com controle de **animais**, **habitats** e **estoque**.  
-Desenvolvido com **Spring Boot**, **MySQL**, **JPA/Hibernate**, **JWT** e documentação via **Swagger**.
+Desenvolvido seguindo o **C4 Model** para arquitetura, garantindo separação de responsabilidades e documentação clara dos containers e componentes.
 
 ---
 
@@ -22,26 +22,61 @@ Desenvolvido com **Spring Boot**, **MySQL**, **JPA/Hibernate**, **JWT** e docume
 
 ---
 
-## 🏗 Estrutura do Sistema (C2 – Container Diagram)
+## 🏗 Arquitetura – C4 Model
 
-### Aplicação Web
+O projeto segue o **C4 Model**, com ênfase nos níveis:
+
+- **C1 – System Context:** mostra os usuários e o sistema como caixa preta  
+- **C2 – Container Diagram:** mostra a divisão do sistema em containers executáveis  
+- **C3 – Component Diagram:** detalha a estrutura interna da API Spring Boot
+
+---
+
+### C2 – Containers
+
+#### 1️⃣ Aplicação Web
 - **Tecnologia:** HTML, CSS, JavaScript  
 - **Responsabilidade:** Interface para interação dos usuários  
 - **Comunicação:** Consome a API via HTTP/JSON
 
-### API Backend
+#### 2️⃣ API Backend
 - **Tecnologia:** Spring Boot + Spring Data JPA + Hibernate + JWT + Swagger  
 - **Responsabilidade:**  
-  - Regras de negócio (Animais, Habitats, Estoque)  
+  - Processar regras de negócio (Animais, Habitats, Estoque)  
   - Autenticação e autorização com JWT  
-  - Documentação da API via Swagger  
+  - Disponibilizar documentação da API via Swagger  
 - **Comunicação:** Recebe requisições da Aplicação Web e persiste dados no MySQL
 
-### Banco de Dados
+#### 3️⃣ Banco de Dados
 - **Tecnologia:** MySQL  
-- **Responsabilidade:** Armazena dados de animais, habitats, estoque e usuários  
+- **Responsabilidade:** Armazenar dados de animais, habitats, estoque e usuários  
 - **Comunicação:** Recebe operações de persistência da API via JPA/Hibernate
 
 ---
 
-## 📦 Estrutura da API (Spring Boot – Pacotes)
+### C3 – Componentes da API (Spring Boot)
+com.zoologico
+├── controller
+│ ├── AnimalController
+│ ├── HabitatController
+│ └── EstoqueController
+│
+├── service
+│ ├── AnimalService
+│ ├── HabitatService
+│ └── EstoqueService
+│
+├── repository
+│ ├── AnimalRepository
+│ ├── HabitatRepository
+│ └── EstoqueRepository
+│
+├── model
+│ ├── Animal
+│ ├── Habitat
+│ └── ItemEstoque
+│
+└── config
+└── SecurityConfig (JWT)
+
+
