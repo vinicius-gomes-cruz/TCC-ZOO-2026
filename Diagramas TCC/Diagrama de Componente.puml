@@ -1,0 +1,41 @@
+@startuml
+title Diagrama de Componentes - Spring Boot (Template)
+
+' Camadas
+package "Controllers (REST)" {
+    [Ex: AnimalController]
+    [Ex: UsuarioController]
+}
+
+package "Services (Regras de Negócio)" {
+    [Ex: AnimalService]
+    [Ex: UsuarioService]
+}
+
+package "Repositories (Acesso a Dados)" {
+    [Ex: AnimalRepository]
+    [Ex: UsuarioRepository]
+}
+
+package "Model (Entidades)" {
+    [Ex: Animal]
+    [Ex: Usuario]
+}
+
+database "Banco de Dados (MySQL)" {
+}
+
+' Relacionamentos principais
+[Ex: AnimalController] --> [Ex: AnimalService]
+[Ex: UsuarioController] --> [Ex: UsuarioService]
+
+[Ex: AnimalService] --> [Ex: AnimalRepository]
+[Ex: UsuarioService] --> [Ex: UsuarioRepository]
+
+[Ex: AnimalRepository] --> "Banco de Dados (MySQL)"
+[Ex: UsuarioRepository] --> "Banco de Dados (MySQL)"
+
+[Ex: AnimalService] --> [Ex: Animal]
+[Ex: UsuarioService] --> [Ex: Usuario]
+
+@enduml

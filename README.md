@@ -11,7 +11,7 @@ Desenvolvido seguindo o **C4 Model** para arquitetura, garantindo separação de
 - **Banco de Dados:** MySQL  
 - **Autenticação:** JWT (JSON Web Tokens)  
 - **Documentação da API:** Swagger  
-- **Frontend:** HTML, CSS, JavaScript  
+- **Frontend:** React
 
 ---
 

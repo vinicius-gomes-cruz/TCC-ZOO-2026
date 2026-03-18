@@ -12,7 +12,7 @@
 ## Containers
 
 ### 1️⃣ Aplicação Web
-- **Tecnologia:** 
+- **Tecnologia:** React
 - **Responsabilidade:** Fornece interface para os usuários interagirem com o sistema.  
 - **Comunicação:** Realiza chamadas HTTP/JSON para a API Backend.  
 
@@ -43,8 +43,3 @@
 - **API Backend → Banco de Dados:** persiste dados via JPA/Hibernate  
 
 ---
-
-## Observações
-- JWT e Swagger são **tecnologias internas da API**, não containers separados  
-- A arquitetura segue **camadas clássicas**: apresentação → negócio → persistência  
-- Essa abordagem é suficiente para **projeto acadêmico** e demonstra conhecimento de boas práticas

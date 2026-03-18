@@ -1,0 +1,23 @@
+@startuml
+title Sistema de Gerenciamento de Zoológico
+
+' Atores
+actor "Funcionário" as Funcionario
+actor "Administrador" as Administrador
+
+' Sistema
+rectangle "Sistema de Gerenciamento do Zoológico" {
+
+    component "Aplicação Web\n(React)" as WebApp
+    component "API Backend\n(Spring Boot)" as API
+    database "Banco de Dados\n(MySQL)" as DB
+
+    WebApp --> API : HTTP/JSON
+    API --> DB : JPA/Hibernate
+}
+
+' Relações com atores
+Funcionario --> WebApp : Utiliza
+Administrador --> WebApp : Administra
+
+@enduml
