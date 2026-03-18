@@ -1,0 +1,27 @@
+@startuml
+title Sistema de Gerenciamento de Zoológico – Diagrama de Containers (C2)
+
+' Pessoas (atores)
+actor "Funcionário" as Funcionario
+actor "Administrador" as Administrador
+
+' Sistema
+rectangle "Sistema de Gerenciamento do Zoológico" {
+
+    component "Aplicação Web\n(React)\n\n- Interface do usuário\n- Consome API REST" as WebApp
+
+    component "API Backend\n(Spring Boot)\n\n- Regras de negócio\n- Autenticação (JWT)\n- Documentação (Swagger)" as API
+
+    database "Banco de Dados\n(MySQL)\n\n- Animais\n- Habitats\n- Estoque\n- Usuários" as DB
+
+    ' Relacionamentos internos
+    WebApp --> API : HTTP/JSON
+    API --> DB : JPA/Hibernate
+}
+
+' Relacionamentos externos
+Funcionario --> WebApp : Gerencia operações
+Administrador --> WebApp : Funções administrativas
+Administrador --> API : Acessa Swagger
+
+@enduml
