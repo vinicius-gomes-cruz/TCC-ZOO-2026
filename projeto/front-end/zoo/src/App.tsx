@@ -1,200 +1,65 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useState } from 'react'
 import './App.css'
-import { getHabitats } from './api'
+import HabitatPage from './pages/HabitatPage'
+
+type Page = 'habitats'
 
 function App() {
-  const [count, setCount] = useState(0)
-  const [habitats, setHabitats] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  // Auth / login UI state
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [loginUser, setLoginUser] = useState('')
-  const [loginPass, setLoginPass] = useState('')
-  const [loginError, setLoginError] = useState<string | null>(null)
-  const [logging, setLogging] = useState(false)
-
-  // Fetch habitats only after authentication
-  useEffect(() => {
-    if (!isAuthenticated) return
-    setLoading(true)
-    getHabitats()
-      .then((data) => setHabitats(data))
-      .catch((err) => setError(String(err)))
-      .finally(() => setLoading(false))
-  }, [isAuthenticated])
-
-  
-
-  // Simple simulated login (no backend auth)
-  if (!isAuthenticated) {
-    return (
-      <main style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            setLoginError(null)
-            if (!loginUser.trim() || !loginPass) {
-              setLoginError('Preencha usuário e senha')
-              return
-            }
-            setLogging(true)
-            // simulate async auth
-            setTimeout(() => {
-              setLogging(false)
-              setIsAuthenticated(true)
-            }, 400)
-          }}
-          style={{ width: 320, padding: 24, border: '1px solid #ddd', borderRadius: 8 }}
-        >
-          <h2>Login</h2>
-          {loginError && <div style={{ color: 'crimson' }}>{loginError}</div>}
-          <div style={{ marginTop: 8 }}>
-            <label>
-              Usuário
-              <input value={loginUser} onChange={(e) => setLoginUser(e.target.value)} style={{ width: '100%' }} />
-            </label>
-          </div>
-          <div style={{ marginTop: 8 }}>
-            <label>
-              Senha
-              <input type="password" value={loginPass} onChange={(e) => setLoginPass(e.target.value)} style={{ width: '100%' }} />
-            </label>
-          </div>
-          <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <button type="submit" disabled={logging}>{logging ? 'Entrando...' : 'Entrar'}</button>
-            <small style={{ color: '#666' }}>usuário qualquer funciona (simulado)</small>
-          </div>
-        </form>
-      </main>
-    )
-  }
+  const [currentPage, setCurrentPage] = useState<Page>('habitats')
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="layout">
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <span className="logo-paw">🐾</span>
+          <span className="logo-text">
+            <span className="logo-zoo">Zoo</span>Gestor
+          </span>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-          <div style={{ marginTop: 12 }}>
-            <strong>Habitats from API:</strong>
-            {loading && <div>Loading...</div>}
-            {error && <div style={{ color: 'crimson' }}>{error}</div>}
-            {!loading && !error && (
-              <ul>
-                {habitats.map((h) => (
-                  <li key={h.id}>{h.nome ?? h.name ?? JSON.stringify(h)}</li>
-                ))}
-              </ul>
-            )}
 
-            {/* Formulário removido por solicitação */}
+        <nav className="sidebar-nav">
+          <button
+            className={`nav-item ${currentPage === 'habitats' ? 'active' : ''}`}
+            onClick={() => setCurrentPage('habitats')}
+          >
+            <span className="nav-icon">🌿</span>
+            Habitats
+          </button>
+        </nav>
+
+        <div className="sidebar-footer">
+          <button className="nav-item">
+            <span className="nav-icon">⚙️</span>
+            Configurações
+          </button>
+        </div>
+      </aside>
+
+      {/* Right side */}
+      <div className="main-wrapper">
+        {/* Top bar */}
+        <header className="topbar">
+          <nav className="topbar-nav">
+            <button
+              className={`topbar-tab ${currentPage === 'habitats' ? 'active' : ''}`}
+              onClick={() => setCurrentPage('habitats')}
+            >
+              Habitats
+            </button>
+          </nav>
+          <div className="topbar-right">
+            <button className="icon-btn" title="Notificações">🔔</button>
+            <div className="user-badge">Admin</div>
           </div>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+        </header>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        {/* Page content */}
+        <main className="content">
+          {currentPage === 'habitats' && <HabitatPage />}
+        </main>
+      </div>
+    </div>
   )
 }
 

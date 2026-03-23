@@ -40,6 +40,8 @@ public class HabitatController {
                 .map(existing -> {
                     existing.setNome(habitat.getNome());
                     existing.setDescricao(habitat.getDescricao());
+                    existing.setAnimais(habitat.getAnimais());
+                    existing.setRequerimentos(habitat.getRequerimentos());
                     Habitat updated = repository.save(existing);
                     return ResponseEntity.ok(updated);
                 })
