@@ -1,11 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import './App.css'
+import { getHabitats } from './api'
 
 function App() {
   const [count, setCount] = useState(0)
+  const [habitats, setHabitats] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setLoading(true)
+    getHabitats()
+      .then((data) => setHabitats(data))
+      .catch((err) => setError(String(err)))
+      .finally(() => setLoading(false))
+  }, [])
 
   return (
     <>
@@ -20,6 +32,18 @@ function App() {
           <p>
             Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
           </p>
+          <div style={{ marginTop: 12 }}>
+            <strong>Habitats from API:</strong>
+            {loading && <div>Loading...</div>}
+            {error && <div style={{ color: 'crimson' }}>{error}</div>}
+            {!loading && !error && (
+              <ul>
+                {habitats.map((h) => (
+                  <li key={h.id}>{h.nome ?? h.name ?? JSON.stringify(h)}</li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
         <button
           className="counter"
