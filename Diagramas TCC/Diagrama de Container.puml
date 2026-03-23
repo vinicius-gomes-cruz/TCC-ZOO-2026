@@ -1,27 +1,23 @@
 @startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 title Sistema de Gerenciamento de Zoológico – Diagrama de Containers (C2)
 
 ' Pessoas (atores)
-actor "Funcionário" as Funcionario
-actor "Administrador" as Administrador
+Person(Funcionario, "Funcionário", "Gerencia operações")
+Person(Administrador, "Administrador", "Funções administrativas")
 
-' Sistema
-rectangle "Sistema de Gerenciamento do Zoológico" {
-
-    component "Aplicação Web\n(React)\n\n- Interface do usuário\n- Consome API REST" as WebApp
-
-    component "API Backend\n(Spring Boot)\n\n- Regras de negócio\n- Autenticação (JWT)\n- Documentação (Swagger)" as API
-
-    database "Banco de Dados\n(MySQL)\n\n- Animais\n- Habitats\n- Estoque\n- Usuários" as DB
-
-    ' Relacionamentos internos
-    WebApp --> API : HTTP/JSON
-    API --> DB : JPA/Hibernate
+' Sistema e containers
+System_Boundary(Sistema, "Sistema de Gerenciamento do Zoológico") {
+    Container(WebApp, "Aplicação Web", "React", "Interface do usuário; consome API REST")
+    Container(API, "API Backend", "Spring Boot", "Regras de negócio; autenticação; documentação")
+    ContainerDb(DB, "Banco de Dados", "MySQL", "Armazena animais, habitats, estoque e usuários")
 }
 
-' Relacionamentos externos
-Funcionario --> WebApp : Gerencia operações
-Administrador --> WebApp : Funções administrativas
-Administrador --> API : Acessa Swagger
+' Relacionamentos
+Rel(Funcionario, WebApp, "Gerencia operações")
+Rel(Administrador, WebApp, "Administra")
+Rel(Administrador, API, "Acessa Swagger")
+Rel(WebApp, API, "HTTP/JSON")
+Rel(API, DB, "JPA/Hibernate")
 
 @enduml

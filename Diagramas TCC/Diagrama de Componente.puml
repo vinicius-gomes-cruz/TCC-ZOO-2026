@@ -1,41 +1,29 @@
 @startuml
-title Diagrama de Componentes - Spring Boot (Template)
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+title Diagrama de Componentes - API Backend (C3)
 
-' Camadas
-package "Controllers (REST)" {
-    [Ex: AnimalController]
-    [Ex: UsuarioController]
+' Componentes dentro do container API
+Container_Boundary(API_Container, "API Backend - Spring Boot") {
+    Component(AnimalController, "AnimalController", "Recebe requisições REST para operações com animais", "Spring MVC")
+    Component(UsuarioController, "UsuarioController", "Recebe requisições REST para operações com usuários", "Spring MVC")
+
+    Component(AnimalService, "AnimalService", "Regras de negócio relacionadas a animais", "Java")
+    Component(UsuarioService, "UsuarioService", "Regras de negócio relacionadas a usuários", "Java")
+
+    Component(AnimalRepository, "AnimalRepository", "Acesso a dados (JPA) para animais", "JPA/Hibernate")
+    Component(UsuarioRepository, "UsuarioRepository", "Acesso a dados (JPA) para usuários", "JPA/Hibernate")
 }
 
-package "Services (Regras de Negócio)" {
-    [Ex: AnimalService]
-    [Ex: UsuarioService]
-}
-
-package "Repositories (Acesso a Dados)" {
-    [Ex: AnimalRepository]
-    [Ex: UsuarioRepository]
-}
-
-package "Model (Entidades)" {
-    [Ex: Animal]
-    [Ex: Usuario]
-}
-
-database "Banco de Dados (MySQL)" {
-}
+ContainerDb(DB, "Banco de Dados", "MySQL", "Persistência de dados")
 
 ' Relacionamentos principais
-[Ex: AnimalController] --> [Ex: AnimalService]
-[Ex: UsuarioController] --> [Ex: UsuarioService]
+Rel(AnimalController, AnimalService, "Chama")
+Rel(UsuarioController, UsuarioService, "Chama")
 
-[Ex: AnimalService] --> [Ex: AnimalRepository]
-[Ex: UsuarioService] --> [Ex: UsuarioRepository]
+Rel(AnimalService, AnimalRepository, "Usa")
+Rel(UsuarioService, UsuarioRepository, "Usa")
 
-[Ex: AnimalRepository] --> "Banco de Dados (MySQL)"
-[Ex: UsuarioRepository] --> "Banco de Dados (MySQL)"
-
-[Ex: AnimalService] --> [Ex: Animal]
-[Ex: UsuarioService] --> [Ex: Usuario]
+Rel(AnimalRepository, DB, "Lê/Escreve")
+Rel(UsuarioRepository, DB, "Lê/Escreve")
 
 @enduml

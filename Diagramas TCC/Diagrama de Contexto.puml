@@ -1,23 +1,16 @@
 @startuml
-title Sistema de Gerenciamento de Zoológico
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+title Sistema de Gerenciamento de Zoológico - Diagrama de Contexto (C1)
 
-' Atores
-actor "Funcionário" as Funcionario
-actor "Administrador" as Administrador
+' Atores / Pessoas
+Person(Funcionario, "Funcionário", "Gerencia operações do zoológico")
+Person(Administrador, "Administrador", "Administração do sistema")
 
-' Sistema
-rectangle "Sistema de Gerenciamento do Zoológico" {
+' Sistema principal
+System(Sistema, "Sistema de Gerenciamento do Zoológico", "Gerencia animais, habitats, estoque e usuários")
 
-    component "Aplicação Web\n(React)" as WebApp
-    component "API Backend\n(Spring Boot)" as API
-    database "Banco de Dados\n(MySQL)" as DB
-
-    WebApp --> API : HTTP/JSON
-    API --> DB : JPA/Hibernate
-}
-
-' Relações com atores
-Funcionario --> WebApp : Utiliza
-Administrador --> WebApp : Administra
+' Relacionamentos
+Rel(Funcionario, Sistema, "Utiliza")
+Rel(Administrador, Sistema, "Administra")
 
 @enduml
