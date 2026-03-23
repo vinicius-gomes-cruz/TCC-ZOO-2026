@@ -10,14 +10,68 @@ function App() {
   const [habitats, setHabitats] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Auth / login UI state
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loginUser, setLoginUser] = useState('')
+  const [loginPass, setLoginPass] = useState('')
+  const [loginError, setLoginError] = useState<string | null>(null)
+  const [logging, setLogging] = useState(false)
 
+  // Fetch habitats only after authentication
   useEffect(() => {
+    if (!isAuthenticated) return
     setLoading(true)
     getHabitats()
       .then((data) => setHabitats(data))
       .catch((err) => setError(String(err)))
       .finally(() => setLoading(false))
-  }, [])
+  }, [isAuthenticated])
+
+  
+
+  // Simple simulated login (no backend auth)
+  if (!isAuthenticated) {
+    return (
+      <main style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            setLoginError(null)
+            if (!loginUser.trim() || !loginPass) {
+              setLoginError('Preencha usuário e senha')
+              return
+            }
+            setLogging(true)
+            // simulate async auth
+            setTimeout(() => {
+              setLogging(false)
+              setIsAuthenticated(true)
+            }, 400)
+          }}
+          style={{ width: 320, padding: 24, border: '1px solid #ddd', borderRadius: 8 }}
+        >
+          <h2>Login</h2>
+          {loginError && <div style={{ color: 'crimson' }}>{loginError}</div>}
+          <div style={{ marginTop: 8 }}>
+            <label>
+              Usuário
+              <input value={loginUser} onChange={(e) => setLoginUser(e.target.value)} style={{ width: '100%' }} />
+            </label>
+          </div>
+          <div style={{ marginTop: 8 }}>
+            <label>
+              Senha
+              <input type="password" value={loginPass} onChange={(e) => setLoginPass(e.target.value)} style={{ width: '100%' }} />
+            </label>
+          </div>
+          <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <button type="submit" disabled={logging}>{logging ? 'Entrando...' : 'Entrar'}</button>
+            <small style={{ color: '#666' }}>usuário qualquer funciona (simulado)</small>
+          </div>
+        </form>
+      </main>
+    )
+  }
 
   return (
     <>
@@ -43,6 +97,8 @@ function App() {
                 ))}
               </ul>
             )}
+
+            {/* Formulário removido por solicitação */}
           </div>
         </div>
         <button
