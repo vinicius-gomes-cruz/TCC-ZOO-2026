@@ -32,3 +32,28 @@ export async function deleteHabitat(id: number) {
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
 }
+
+/* ── Animais ─────────────────────────────────────────────────── */
+
+export async function getAnimalsByHabitat(habitatId: number) {
+  const res = await fetch(`${API_BASE}/api/animais/habitat/${habitatId}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
+  return res.json();
+}
+
+export async function createAnimal(payload: any) {
+  const res = await fetch(`${API_BASE}/api/animais`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
+  return res.json();
+}
+
+export async function deleteAnimal(id: number) {
+  const res = await fetch(`${API_BASE}/api/animais/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
+}
