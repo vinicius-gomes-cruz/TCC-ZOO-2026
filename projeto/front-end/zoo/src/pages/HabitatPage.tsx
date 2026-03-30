@@ -111,76 +111,63 @@ export default function HabitatPage() {
 
       {loading ? (
         <div className="loading">Carregando...</div>
+      ) : habitats.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">🌿</div>
+          <p>Nenhum habitat cadastrado. Clique em "Novo Habitat" para começar.</p>
+        </div>
       ) : (
-        <div className="card">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Nome</th>
-                <th>Descrição</th>
-                <th>Animais</th>
-                <th>Requerimentos</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {habitats.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="empty">
-                    Nenhum habitat cadastrado. Clique em "Novo Habitat" para começar.
-                  </td>
-                </tr>
-              ) : (
-                habitats.map((h) => (
-                  <tr key={h.id}>
-                    <td className="td-id">{h.id}</td>
-                    <td className="td-nome">
-                      <div className="habitat-icon">🌿</div>
-                      <strong>{h.nome}</strong>
-                    </td>
-                    <td className="td-desc">{h.descricao || <span className="no-data">—</span>}</td>
-                    <td>
-                      <div className="tag-list">
-                        {(h.animais ?? []).length === 0 ? (
-                          <span className="no-data">Nenhum</span>
-                        ) : (
-                          (h.animais ?? []).map((a, i) => (
-                            <span key={i} className="tag tag-green">
-                              {a}
-                            </span>
-                          ))
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="tag-list">
-                        {(h.requerimentos ?? []).length === 0 ? (
-                          <span className="no-data">Nenhum</span>
-                        ) : (
-                          (h.requerimentos ?? []).map((r, i) => (
-                            <span key={i} className="tag tag-blue">
-                              {r}
-                            </span>
-                          ))
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="action-btns">
-                        <button className="btn-edit" onClick={() => openEdit(h)}>
-                          ✏️ Editar
-                        </button>
-                        <button className="btn-delete" onClick={() => handleDelete(h.id)}>
-                          🗑️ Excluir
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+        <div className="habitat-grid">
+          {habitats.map((h) => (
+            <div key={h.id} className="habitat-card">
+              <div className="habitat-card-header">
+                <div className="habitat-card-icon">🌿</div>
+                <div className="habitat-card-title">
+                  <span className="habitat-card-id">#{h.id}</span>
+                  <h3>{h.nome}</h3>
+                </div>
+              </div>
+
+              {h.descricao && (
+                <p className="habitat-card-desc">{h.descricao}</p>
               )}
-            </tbody>
-          </table>
+
+              <div className="habitat-card-section">
+                <span className="habitat-card-label">🐾 Animais</span>
+                <div className="tag-list">
+                  {(h.animais ?? []).length === 0 ? (
+                    <span className="no-data">Nenhum</span>
+                  ) : (
+                    (h.animais ?? []).map((a, i) => (
+                      <span key={i} className="tag tag-green">{a}</span>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="habitat-card-section">
+                <span className="habitat-card-label">📋 Requerimentos</span>
+                <div className="tag-list">
+                  {(h.requerimentos ?? []).length === 0 ? (
+                    <span className="no-data">Nenhum</span>
+                  ) : (
+                    (h.requerimentos ?? []).map((r, i) => (
+                      <span key={i} className="tag tag-blue">{r}</span>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="habitat-card-actions">
+                <button className="btn-edit" onClick={() => openEdit(h)}>
+                  ✏️ Editar
+                </button>
+                <button className="btn-delete" onClick={() => handleDelete(h.id)}>
+                  🗑️ Excluir
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

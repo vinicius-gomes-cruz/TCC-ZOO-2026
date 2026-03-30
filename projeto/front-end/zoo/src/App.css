@@ -548,6 +548,126 @@
 }
 
 
+/* ─── Habitat Cards ────────────────────────────────────────── */
+.habitat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.habitat-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e8eaed;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.habitat-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.habitat-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.habitat-card-icon {
+  width: 48px;
+  height: 48px;
+  background: #e8f5e9;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.habitat-card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.habitat-card-id {
+  font-size: 11px;
+  color: #9aa0a6;
+  font-weight: 500;
+}
+
+.habitat-card-title h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.habitat-card-desc {
+  font-size: 13px;
+  color: #5f6368;
+  margin: 0;
+  line-height: 1.5;
+  border-top: 1px solid #f0f2f5;
+  padding-top: 12px;
+}
+
+.habitat-card-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.habitat-card-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9aa0a6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.habitat-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #f0f2f5;
+}
+
+.habitat-card-actions .btn-edit,
+.habitat-card-actions .btn-delete {
+  flex: 1;
+  justify-content: center;
+  text-align: center;
+}
+
+/* ─── Empty state ───────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #9aa0a6;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.empty-state p {
+  font-size: 15px;
+  margin: 0;
+}
+
 .hero {
   position: relative;
 
