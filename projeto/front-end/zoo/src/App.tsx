@@ -1,11 +1,22 @@
 import { useState } from 'react'
 import './App.css'
-import HabitatPage from './pages/HabitatPage'
+import HabitatPage, { type Habitat } from './pages/HabitatPage'
+import HabitatAnimalsPage from './pages/HabitatAnimalsPage'
 
-type Page = 'habitats'
+type Page = 'habitats' | 'habitat-animals'
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('habitats')
+  const [selectedHabitat, setSelectedHabitat] = useState<Habitat | null>(null)
+
+  const openHabitatAnimals = (habitat: Habitat) => {
+    setSelectedHabitat(habitat)
+    setCurrentPage('habitat-animals')
+  }
+
+  const backToHabitats = () => {
+    setCurrentPage('habitats')
+  }
 
   return (
     <div className="layout">
@@ -42,21 +53,28 @@ function App() {
         <header className="topbar">
           <nav className="topbar-nav">
             <button
-              className={`topbar-tab ${currentPage === 'habitats' ? 'active' : ''}`}
+              className={`topbar-tab ${currentPage !== 'habitat-animals' ? 'active' : ''}`}
               onClick={() => setCurrentPage('habitats')}
             >
               Habitats
             </button>
+            {currentPage === 'habitat-animals' && selectedHabitat && (
+              <button className="topbar-tab active" disabled>
+                {selectedHabitat.nome}
+              </button>
+            )}
           </nav>
           <div className="topbar-right">
-            <button className="icon-btn" title="Notificações">🔔</button>
             <div className="user-badge">Admin</div>
           </div>
         </header>
 
         {/* Page content */}
         <main className="content">
-          {currentPage === 'habitats' && <HabitatPage />}
+          {currentPage === 'habitats' && <HabitatPage onOpenHabitat={openHabitatAnimals} />}
+          {currentPage === 'habitat-animals' && selectedHabitat && (
+            <HabitatAnimalsPage habitat={selectedHabitat} onBack={backToHabitats} />
+          )}
         </main>
       </div>
     </div>
