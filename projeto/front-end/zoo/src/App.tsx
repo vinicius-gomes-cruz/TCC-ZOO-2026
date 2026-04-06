@@ -52,12 +52,6 @@ function App() {
         {/* Top bar */}
         <header className="topbar">
           <nav className="topbar-nav">
-            <button
-              className={`topbar-tab ${currentPage !== 'habitat-animals' ? 'active' : ''}`}
-              onClick={() => setCurrentPage('habitats')}
-            >
-              Habitats
-            </button>
             {currentPage === 'habitat-animals' && selectedHabitat && (
               <button className="topbar-tab active" disabled>
                 {selectedHabitat.nome}
