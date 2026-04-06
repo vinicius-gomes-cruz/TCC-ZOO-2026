@@ -64,9 +64,6 @@ function App() {
               </button>
             )}
           </nav>
-          <div className="topbar-right">
-            <div className="user-badge">Admin</div>
-          </div>
         </header>
 
         {/* Page content */}

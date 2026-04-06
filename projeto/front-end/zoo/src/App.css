@@ -799,6 +799,21 @@
   text-overflow: ellipsis;
 }
 
+.animal-chip-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-top: 4px;
+}
+
+.animal-chip-meta span {
+  font-size: 11px;
+  color: #5f6368;
+  background: #eef2f6;
+  border-radius: 12px;
+  padding: 2px 8px;
+}
+
 .animal-chip-remove {
   background: none;
   border: none;
@@ -810,6 +825,30 @@
   flex-shrink: 0;
   border-radius: 4px;
   transition: color 0.15s, background 0.15s;
+}
+
+.animal-chip-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.animal-chip-edit {
+  background: none;
+  border: none;
+  color: #5f6368;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 6px;
+  line-height: 1;
+  flex-shrink: 0;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.animal-chip-edit:hover {
+  color: #2e7d32;
+  background: #e8f5e9;
 }
 
 .animal-chip-remove:hover {

@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react'
-import { createAnimal, deleteAnimal, getAnimalsByHabitat } from '../api'
+import { createAnimal, deleteAnimal, getAnimalsByHabitat, updateAnimal } from '../api'
 import type { Habitat } from './HabitatPage'
 
 interface Animal {
   id?: number
-  nome: string
+  nomePopular: string
+  nomeCientifico: string
   especie: string
-  idade: number | ''
-  peso: number | ''
-  descricao: string
+  numeroMicrochipOuAnilha: string
+  localizacaoMicrochip: string
+  apelido: string
+  observacaoSaude: string
+  tratamentosFeitos: string
+  alimentacao: string
 }
 
 interface HabitatAnimalsPageProps {
@@ -17,11 +21,15 @@ interface HabitatAnimalsPageProps {
 }
 
 const emptyAnimal: Animal = {
-  nome: '',
+  nomePopular: '',
+  nomeCientifico: '',
   especie: '',
-  idade: '',
-  peso: '',
-  descricao: '',
+  numeroMicrochipOuAnilha: '',
+  localizacaoMicrochip: '',
+  apelido: '',
+  observacaoSaude: '',
+  tratamentosFeitos: '',
+  alimentacao: '',
 }
 
 const speciesPalette = [
@@ -50,6 +58,7 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
   const [error, setError] = useState<string | null>(null)
   const [showAnimalModal, setShowAnimalModal] = useState(false)
   const [form, setForm] = useState<Animal>(emptyAnimal)
+  const [editingAnimalId, setEditingAnimalId] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
 
   const load = () => {
@@ -70,22 +79,55 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
 
     setSaving(true)
     try {
-      await createAnimal({
-        nome: form.nome,
+      const payload = {
+        nomePopular: form.nomePopular,
+        nomeCientifico: form.nomeCientifico,
         especie: form.especie,
-        idade: form.idade === '' ? null : Number(form.idade),
-        peso: form.peso === '' ? null : Number(form.peso),
-        descricao: form.descricao,
+        numeroMicrochipOuAnilha: form.numeroMicrochipOuAnilha,
+        localizacaoMicrochip: form.localizacaoMicrochip,
+        apelido: form.apelido,
+        observacaoSaude: form.observacaoSaude,
+        tratamentosFeitos: form.tratamentosFeitos,
+        alimentacao: form.alimentacao,
         habitatId: habitat.id,
-      })
+      }
+
+      if (editingAnimalId) {
+        await updateAnimal(editingAnimalId, payload)
+      } else {
+        await createAnimal(payload)
+      }
       setShowAnimalModal(false)
       setForm(emptyAnimal)
+      setEditingAnimalId(null)
       load()
     } catch (e) {
       setError(String(e))
     } finally {
       setSaving(false)
     }
+  }
+
+  const openCreateAnimal = () => {
+    setEditingAnimalId(null)
+    setForm(emptyAnimal)
+    setShowAnimalModal(true)
+  }
+
+  const openEditAnimal = (animal: Animal) => {
+    setEditingAnimalId(animal.id ?? null)
+    setForm({
+      nomePopular: animal.nomePopular ?? '',
+      nomeCientifico: animal.nomeCientifico ?? '',
+      especie: animal.especie ?? '',
+      numeroMicrochipOuAnilha: animal.numeroMicrochipOuAnilha ?? '',
+      localizacaoMicrochip: animal.localizacaoMicrochip ?? '',
+      apelido: animal.apelido ?? '',
+      observacaoSaude: animal.observacaoSaude ?? '',
+      tratamentosFeitos: animal.tratamentosFeitos ?? '',
+      alimentacao: animal.alimentacao ?? '',
+    })
+    setShowAnimalModal(true)
   }
 
   const handleDeleteAnimal = async (animalId?: number) => {
@@ -109,7 +151,7 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
           <button className="btn-secondary" onClick={onBack}>
             ← Voltar
           </button>
-          <button className="btn-primary" onClick={() => setShowAnimalModal(true)}>
+          <button className="btn-primary" onClick={openCreateAnimal}>
             + Novo Animal
           </button>
         </div>
@@ -137,16 +179,38 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
                       {visual.label}
                     </span>
                     <div className="animal-chip-info">
-                      <span className="animal-chip-nome">{animal.nome}</span>
-                      <span className="animal-chip-especie">{animal.especie}</span>
+                      <span className="animal-chip-nome">{animal.apelido || animal.nomePopular || 'Sem nome'}</span>
+                      <span className="animal-chip-especie">
+                        {animal.nomeCientifico ? `${animal.especie} • ${animal.nomeCientifico}` : animal.especie}
+                      </span>
+                      <div className="animal-chip-meta">
+                        {animal.numeroMicrochipOuAnilha && (
+                          <span>Microchip/Anilha: {animal.numeroMicrochipOuAnilha}</span>
+                        )}
+                        {animal.localizacaoMicrochip && (
+                          <span>Localização: {animal.localizacaoMicrochip}</span>
+                        )}
+                        {animal.alimentacao && <span>Alimentação: {animal.alimentacao}</span>}
+                        {animal.observacaoSaude && <span>Saúde: {animal.observacaoSaude}</span>}
+                        {animal.tratamentosFeitos && <span>Tratamentos: {animal.tratamentosFeitos}</span>}
+                      </div>
                     </div>
-                    <button
-                      className="animal-chip-remove"
-                      onClick={() => handleDeleteAnimal(animal.id)}
-                      title="Remover animal"
-                    >
-                      ×
-                    </button>
+                    <div className="animal-chip-actions">
+                      <button
+                        className="animal-chip-edit"
+                        onClick={() => openEditAnimal(animal)}
+                        title="Editar animal"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className="animal-chip-remove"
+                        onClick={() => handleDeleteAnimal(animal.id)}
+                        title="Remover animal"
+                      >
+                        ×
+                      </button>
+                    </div>
                   </div>
                 )
               })}
@@ -159,18 +223,26 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
         <div className="modal-overlay" onClick={() => setShowAnimalModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Novo Animal</h2>
+              <h2>{editingAnimalId ? 'Editar Animal' : 'Novo Animal'}</h2>
               <button className="modal-close" onClick={() => setShowAnimalModal(false)}>
                 ✕
               </button>
             </div>
             <form onSubmit={handleSubmit} className="modal-form">
               <label>
-                Nome <span className="required">*</span>
+                Nome popular <span className="required">*</span>
                 <input
                   required
-                  value={form.nome}
-                  onChange={(e) => setForm((prev) => ({ ...prev, nome: e.target.value }))}
+                  value={form.nomePopular}
+                  onChange={(e) => setForm((prev) => ({ ...prev, nomePopular: e.target.value }))}
+                />
+              </label>
+
+              <label>
+                Nome científico
+                <input
+                  value={form.nomeCientifico}
+                  onChange={(e) => setForm((prev) => ({ ...prev, nomeCientifico: e.target.value }))}
                 />
               </label>
 
@@ -185,30 +257,25 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
 
               <div className="modal-form-row">
                 <label>
-                  Idade (anos)
+                  Nº microchip/anilha
                   <input
-                    type="number"
-                    min={0}
-                    value={form.idade}
+                    value={form.numeroMicrochipOuAnilha}
                     onChange={(e) =>
                       setForm((prev) => ({
                         ...prev,
-                        idade: e.target.value === '' ? '' : Number(e.target.value),
+                        numeroMicrochipOuAnilha: e.target.value,
                       }))
                     }
                   />
                 </label>
                 <label>
-                  Peso (kg)
+                  Localização do microchip
                   <input
-                    type="number"
-                    min={0}
-                    step="0.1"
-                    value={form.peso}
+                    value={form.localizacaoMicrochip}
                     onChange={(e) =>
                       setForm((prev) => ({
                         ...prev,
-                        peso: e.target.value === '' ? '' : Number(e.target.value),
+                        localizacaoMicrochip: e.target.value,
                       }))
                     }
                   />
@@ -216,11 +283,37 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
               </div>
 
               <label>
-                Descrição
+                Apelido
+                <input
+                  value={form.apelido}
+                  onChange={(e) => setForm((prev) => ({ ...prev, apelido: e.target.value }))}
+                />
+              </label>
+
+              <label>
+                Observação de saúde
                 <textarea
                   rows={2}
-                  value={form.descricao}
-                  onChange={(e) => setForm((prev) => ({ ...prev, descricao: e.target.value }))}
+                  value={form.observacaoSaude}
+                  onChange={(e) => setForm((prev) => ({ ...prev, observacaoSaude: e.target.value }))}
+                />
+              </label>
+
+              <label>
+                Tratamentos feitos
+                <textarea
+                  rows={2}
+                  value={form.tratamentosFeitos}
+                  onChange={(e) => setForm((prev) => ({ ...prev, tratamentosFeitos: e.target.value }))}
+                />
+              </label>
+
+              <label>
+                Alimentação
+                <textarea
+                  rows={2}
+                  value={form.alimentacao}
+                  onChange={(e) => setForm((prev) => ({ ...prev, alimentacao: e.target.value }))}
                 />
               </label>
 
@@ -229,7 +322,7 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
                   Cancelar
                 </button>
                 <button type="submit" className="btn-primary" disabled={saving}>
-                  {saving ? 'Salvando...' : 'Salvar'}
+                  {saving ? 'Salvando...' : editingAnimalId ? 'Salvar Alterações' : 'Salvar'}
                 </button>
               </div>
             </form>

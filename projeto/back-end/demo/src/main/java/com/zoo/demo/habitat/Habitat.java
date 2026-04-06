@@ -37,6 +37,11 @@ public class Habitat {
     @Column(name = "animal")
     private List<String> animais = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "habitat_enriquecimentos", joinColumns = @JoinColumn(name = "habitat_id"))
+    @Column(name = "enriquecimento")
+    private List<String> enriquecimentoAmbiental = new ArrayList<>();
+
     public Habitat() {
     }
 

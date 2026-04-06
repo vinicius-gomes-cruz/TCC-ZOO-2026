@@ -51,6 +51,16 @@ export async function createAnimal(payload: any) {
   return res.json();
 }
 
+export async function updateAnimal(id: number, payload: any) {
+  const res = await fetch(`${API_BASE}/api/animais/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
+  return res.json();
+}
+
 export async function deleteAnimal(id: number) {
   const res = await fetch(`${API_BASE}/api/animais/${id}`, {
     method: 'DELETE',

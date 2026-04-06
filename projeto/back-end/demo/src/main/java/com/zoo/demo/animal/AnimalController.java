@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/animais")
@@ -41,11 +40,15 @@ public class AnimalController {
     @PostMapping
     public ResponseEntity<Animal> create(@RequestBody AnimalRequest request) {
         Animal animal = new Animal();
-        animal.setNome(request.getNome());
+        animal.setNomePopular(request.getNomePopular());
+        animal.setNomeCientifico(request.getNomeCientifico());
         animal.setEspecie(request.getEspecie());
-        animal.setIdade(request.getIdade());
-        animal.setPeso(request.getPeso());
-        animal.setDescricao(request.getDescricao());
+        animal.setNumeroMicrochipOuAnilha(request.getNumeroMicrochipOuAnilha());
+        animal.setLocalizacaoMicrochip(request.getLocalizacaoMicrochip());
+        animal.setApelido(request.getApelido());
+        animal.setObservacaoSaude(request.getObservacaoSaude());
+        animal.setTratamentosFeitos(request.getTratamentosFeitos());
+        animal.setAlimentacao(request.getAlimentacao());
 
         if (request.getHabitatId() != null) {
             Habitat habitat = habitatRepository.findById(request.getHabitatId())
@@ -61,11 +64,15 @@ public class AnimalController {
     public ResponseEntity<Animal> update(@PathVariable Long id, @RequestBody AnimalRequest request) {
         return animalRepository.findById(id)
                 .map(existing -> {
-                    existing.setNome(request.getNome());
+                    existing.setNomePopular(request.getNomePopular());
+                    existing.setNomeCientifico(request.getNomeCientifico());
                     existing.setEspecie(request.getEspecie());
-                    existing.setIdade(request.getIdade());
-                    existing.setPeso(request.getPeso());
-                    existing.setDescricao(request.getDescricao());
+                    existing.setNumeroMicrochipOuAnilha(request.getNumeroMicrochipOuAnilha());
+                    existing.setLocalizacaoMicrochip(request.getLocalizacaoMicrochip());
+                    existing.setApelido(request.getApelido());
+                    existing.setObservacaoSaude(request.getObservacaoSaude());
+                    existing.setTratamentosFeitos(request.getTratamentosFeitos());
+                    existing.setAlimentacao(request.getAlimentacao());
 
                     if (request.getHabitatId() != null) {
                         Habitat habitat = habitatRepository.findById(request.getHabitatId())

@@ -42,6 +42,7 @@ public class HabitatController {
                     existing.setDescricao(habitat.getDescricao());
                     existing.setAnimais(habitat.getAnimais());
                     existing.setRequerimentos(habitat.getRequerimentos());
+                    existing.setEnriquecimentoAmbiental(habitat.getEnriquecimentoAmbiental());
                     Habitat updated = repository.save(existing);
                     return ResponseEntity.ok(updated);
                 })

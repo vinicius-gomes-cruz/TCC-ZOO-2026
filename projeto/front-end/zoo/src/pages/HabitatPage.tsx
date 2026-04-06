@@ -7,13 +7,20 @@ export interface Habitat {
   descricao: string
   animais: string[]
   requerimentos: string[]
+  enriquecimentoAmbiental: string[]
 }
 
 interface HabitatPageProps {
   onOpenHabitat: (habitat: Habitat) => void
 }
 
-const emptyHabitat: Habitat = { nome: '', descricao: '', animais: [], requerimentos: [] }
+const emptyHabitat: Habitat = {
+  nome: '',
+  descricao: '',
+  animais: [],
+  requerimentos: [],
+  enriquecimentoAmbiental: [],
+}
 
 export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
   const [habitats, setHabitats] = useState<Habitat[]>([])
@@ -24,6 +31,7 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
   const [editing, setEditing] = useState<Habitat | null>(null)
   const [form, setForm] = useState<Habitat>(emptyHabitat)
   const [reqInput, setReqInput] = useState('')
+  const [enriqInput, setEnriqInput] = useState('')
   const [saving, setSaving] = useState(false)
 
   const load = () => {
@@ -41,13 +49,19 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
     setEditing(null)
     setForm(emptyHabitat)
     setReqInput('')
+    setEnriqInput('')
     setShowModal(true)
   }
 
   const openEdit = (habitat: Habitat) => {
     setEditing(habitat)
-    setForm({ ...habitat, requerimentos: [...(habitat.requerimentos ?? [])] })
+    setForm({
+      ...habitat,
+      requerimentos: [...(habitat.requerimentos ?? [])],
+      enriquecimentoAmbiental: [...(habitat.enriquecimentoAmbiental ?? [])],
+    })
     setReqInput('')
+    setEnriqInput('')
     setShowModal(true)
   }
 
@@ -89,6 +103,22 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
     setForm((prev) => ({
       ...prev,
       requerimentos: prev.requerimentos.filter((_, idx) => idx !== index),
+    }))
+  }
+
+  const addEnriq = () => {
+    if (!enriqInput.trim()) return
+    setForm((prev) => ({
+      ...prev,
+      enriquecimentoAmbiental: [...prev.enriquecimentoAmbiental, enriqInput.trim()],
+    }))
+    setEnriqInput('')
+  }
+
+  const removeEnriq = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      enriquecimentoAmbiental: prev.enriquecimentoAmbiental.filter((_, idx) => idx !== index),
     }))
   }
 
@@ -192,6 +222,17 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
                     </div>
                   </div>
                 )}
+
+                {(h.enriquecimentoAmbiental ?? []).length > 0 && (
+                  <div className="habitat-card-section">
+                    <span className="habitat-card-label">🧩 Enriquecimento ambiental</span>
+                    <div className="tag-list">
+                      {h.enriquecimentoAmbiental.map((item, i) => (
+                        <span key={i} className="tag tag-green">{item}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )
           })}
@@ -246,6 +287,29 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
                   <span key={i} className="tag tag-blue tag-removable">
                     {r}
                     <button type="button" onClick={() => removeReq(i)}>×</button>
+                  </span>
+                ))}
+              </div>
+
+              <label>Enriquecimento ambiental</label>
+              <div className="tag-input-row">
+                <input
+                  value={enriqInput}
+                  onChange={(e) => setEnriqInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); addEnriq() }
+                  }}
+                  placeholder="Ex: Brinquedos, troncos, forrageio..."
+                />
+                <button type="button" className="btn-add" onClick={addEnriq}>
+                  Adicionar
+                </button>
+              </div>
+              <div className="tag-list">
+                {form.enriquecimentoAmbiental.map((item, i) => (
+                  <span key={i} className="tag tag-green tag-removable">
+                    {item}
+                    <button type="button" onClick={() => removeEnriq(i)}>×</button>
                   </span>
                 ))}
               </div>

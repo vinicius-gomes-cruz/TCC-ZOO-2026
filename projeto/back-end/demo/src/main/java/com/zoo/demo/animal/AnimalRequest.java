@@ -7,10 +7,14 @@ import lombok.Setter;
 @Setter
 public class AnimalRequest {
 
-    private String nome;
+    private String nomePopular;
+    private String nomeCientifico;
     private String especie;
-    private Integer idade;
-    private Double peso;
-    private String descricao;
+    private String numeroMicrochipOuAnilha;
+    private String localizacaoMicrochip;
+    private String apelido;
+    private String observacaoSaude;
+    private String tratamentosFeitos;
+    private String alimentacao;
     private Long habitatId;
 }
