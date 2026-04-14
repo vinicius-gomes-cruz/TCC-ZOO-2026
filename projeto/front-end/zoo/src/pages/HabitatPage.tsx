@@ -1,13 +1,25 @@
 import { useEffect, useState } from 'react'
 import { createHabitat, deleteHabitat, getHabitats, updateHabitat } from '../api'
 
+export interface Requerimento {
+  descricao: string
+  dataAdicionada: string
+  dataRemovida?: string
+}
+
+export interface EnriquecimentoAmbiental {
+  descricao: string
+  dataAdicionada: string
+  dataRemovida?: string
+}
+
 export interface Habitat {
   id?: number
   nome: string
   descricao: string
   animais: string[]
-  requerimentos: string[]
-  enriquecimentoAmbiental: string[]
+  requerimentos: Requerimento[]
+  enriquecimentoAmbiental: EnriquecimentoAmbiental[]
 }
 
 interface HabitatPageProps {
@@ -95,22 +107,32 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
 
   const addReq = () => {
     if (!reqInput.trim()) return
-    setForm((prev) => ({ ...prev, requerimentos: [...prev.requerimentos, reqInput.trim()] }))
+    const newReq: Requerimento = {
+      descricao: reqInput.trim(),
+      dataAdicionada: new Date().toISOString(),
+    }
+    setForm((prev) => ({ ...prev, requerimentos: [...prev.requerimentos, newReq] }))
     setReqInput('')
   }
 
   const removeReq = (index: number) => {
     setForm((prev) => ({
       ...prev,
-      requerimentos: prev.requerimentos.filter((_, idx) => idx !== index),
+      requerimentos: prev.requerimentos.map((r, i) =>
+        i === index ? { ...r, dataRemovida: new Date().toISOString() } : r
+      ),
     }))
   }
 
   const addEnriq = () => {
     if (!enriqInput.trim()) return
+    const newEnriq: EnriquecimentoAmbiental = {
+      descricao: enriqInput.trim(),
+      dataAdicionada: new Date().toISOString(),
+    }
     setForm((prev) => ({
       ...prev,
-      enriquecimentoAmbiental: [...prev.enriquecimentoAmbiental, enriqInput.trim()],
+      enriquecimentoAmbiental: [...prev.enriquecimentoAmbiental, newEnriq],
     }))
     setEnriqInput('')
   }
@@ -118,7 +140,9 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
   const removeEnriq = (index: number) => {
     setForm((prev) => ({
       ...prev,
-      enriquecimentoAmbiental: prev.enriquecimentoAmbiental.filter((_, idx) => idx !== index),
+      enriquecimentoAmbiental: prev.enriquecimentoAmbiental.map((e, i) =>
+        i === index ? { ...e, dataRemovida: new Date().toISOString() } : e
+      ),
     }))
   }
 
@@ -217,7 +241,17 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
                     <span className="habitat-card-label">📋 Requerimentos</span>
                     <div className="tag-list">
                       {h.requerimentos.map((r, i) => (
-                        <span key={i} className="tag tag-blue">{r}</span>
+                        <span key={i} className="tag tag-blue">
+                          {r.descricao}
+                          <br />
+                          <small>Adicionado: {new Date(r.dataAdicionada).toLocaleDateString('pt-BR')}</small>
+                          {r.dataRemovida && (
+                            <>
+                              <br />
+                              <small>Removido: {new Date(r.dataRemovida).toLocaleDateString('pt-BR')}</small>
+                            </>
+                          )}
+                        </span>
                       ))}
                     </div>
                   </div>
@@ -228,7 +262,17 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
                     <span className="habitat-card-label">🧩 Enriquecimento ambiental</span>
                     <div className="tag-list">
                       {h.enriquecimentoAmbiental.map((item, i) => (
-                        <span key={i} className="tag tag-green">{item}</span>
+                        <span key={i} className="tag tag-green">
+                          {item.descricao}
+                          <br />
+                          <small>Adicionado: {new Date(item.dataAdicionada).toLocaleDateString('pt-BR')}</small>
+                          {item.dataRemovida && (
+                            <>
+                              <br />
+                              <small>Removido: {new Date(item.dataRemovida).toLocaleDateString('pt-BR')}</small>
+                            </>
+                          )}
+                        </span>
                       ))}
                     </div>
                   </div>
@@ -285,7 +329,15 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
               <div className="tag-list">
                 {form.requerimentos.map((r, i) => (
                   <span key={i} className="tag tag-blue tag-removable">
-                    {r}
+                    {r.descricao}
+                    <br />
+                    <small>Adicionado: {new Date(r.dataAdicionada).toLocaleDateString('pt-BR')}</small>
+                    {r.dataRemovida && (
+                      <>
+                        <br />
+                        <small>Removido: {new Date(r.dataRemovida).toLocaleDateString('pt-BR')}</small>
+                      </>
+                    )}
                     <button type="button" onClick={() => removeReq(i)}>×</button>
                   </span>
                 ))}
@@ -308,7 +360,15 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
               <div className="tag-list">
                 {form.enriquecimentoAmbiental.map((item, i) => (
                   <span key={i} className="tag tag-green tag-removable">
-                    {item}
+                    {item.descricao}
+                    <br />
+                    <small>Adicionado: {new Date(item.dataAdicionada).toLocaleDateString('pt-BR')}</small>
+                    {item.dataRemovida && (
+                      <>
+                        <br />
+                        <small>Removido: {new Date(item.dataRemovida).toLocaleDateString('pt-BR')}</small>
+                      </>
+                    )}
                     <button type="button" onClick={() => removeEnriq(i)}>×</button>
                   </span>
                 ))}
