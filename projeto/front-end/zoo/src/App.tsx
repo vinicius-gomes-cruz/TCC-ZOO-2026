@@ -54,13 +54,6 @@ function App() {
             Estoque
           </button>
         </nav>
-
-        <div className="sidebar-footer">
-          <button className="nav-item">
-            <span className="nav-icon">⚙️</span>
-            Configurações
-          </button>
-        </div>
       </aside>
 
       {/* Right side */}
