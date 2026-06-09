@@ -1,9 +1,25 @@
 export const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
+async function handleResponse(res: Response) {
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(`HTTP ${res.status} - ${res.statusText}${text ? `: ${text}` : ''}`)
+  }
+
+  if (res.status === 204) return null
+
+  const contentType = res.headers.get('content-type') || ''
+  if (contentType.includes('application/json')) {
+    return res.json()
+  }
+
+  // Fallback: return raw text for easier debugging
+  return res.text()
+}
+
 export async function getHabitats() {
   const res = await fetch(`${API_BASE}/api/habitats`);
-  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function createHabitat(payload: any) {
@@ -12,8 +28,7 @@ export async function createHabitat(payload: any) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function updateHabitat(id: number, payload: any) {
@@ -22,8 +37,7 @@ export async function updateHabitat(id: number, payload: any) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function deleteHabitat(id: number) {
@@ -37,8 +51,7 @@ export async function deleteHabitat(id: number) {
 
 export async function getAnimalsByHabitat(habitatId: number) {
   const res = await fetch(`${API_BASE}/api/animais/habitat/${habitatId}`);
-  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function createAnimal(payload: any) {
@@ -47,8 +60,7 @@ export async function createAnimal(payload: any) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function updateAnimal(id: number, payload: any) {
@@ -57,8 +69,7 @@ export async function updateAnimal(id: number, payload: any) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function deleteAnimal(id: number) {
@@ -76,20 +87,17 @@ export async function criarAlimentacao(animalId: number, payload: any) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function listarAlimentacoesPorAnimal(animalId: number) {
   const res = await fetch(`${API_BASE}/api/estoque/animal/${animalId}/alimentacoes`);
-  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function listarAlimentacoesAbertas(animalId: number) {
   const res = await fetch(`${API_BASE}/api/estoque/animal/${animalId}/alimentacoes/abertas`);
-  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function obterAlimentacao(id: number) {

@@ -1,6 +1,7 @@
 package com.zoo.demo.estoque;
 
 import com.zoo.demo.animal.Animal;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -20,6 +21,7 @@ public class Alimentacao {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "animal_id")
+    @JsonBackReference
     private Animal animal;
 
     public Alimentacao() {}

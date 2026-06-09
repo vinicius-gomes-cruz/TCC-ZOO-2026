@@ -2,6 +2,7 @@ package com.zoo.demo.animal;
 
 import com.zoo.demo.habitat.Habitat;
 import com.zoo.demo.estoque.Alimentacao;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -51,6 +52,7 @@ public class Animal {
     private Habitat habitat;
 
     @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<Alimentacao> alimentacoes;
 
     public Animal() {
