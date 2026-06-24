@@ -4,26 +4,31 @@ title Diagrama de Componentes - API Backend (C3)
 
 ' Componentes dentro do container API
 Container_Boundary(API_Container, "API Backend - Spring Boot") {
-    Component(AnimalController, "AnimalController", "Recebe requisições REST para operações com animais", "Spring MVC")
-    Component(UsuarioController, "UsuarioController", "Recebe requisições REST para operações com usuários", "Spring MVC")
 
-    Component(AnimalService, "AnimalService", "Regras de negócio relacionadas a animais", "Java")
-    Component(UsuarioService, "UsuarioService", "Regras de negócio relacionadas a usuários", "Java")
+    ' Controllers (camada de entrada REST)
+    Component(AnimalController, "AnimalController", "Recebe requisições REST para operações com animais\nGET /api/animais, POST, PUT, DELETE", "Spring MVC @RestController")
+    Component(HabitatController, "HabitatController", "Recebe requisições REST para operações com habitats\nGET /api/habitats, POST, PUT, DELETE", "Spring MVC @RestController")
+    Component(UsuarioController, "UsuarioController", "Recebe requisições REST para operações com usuários\nGET /api/usuarios, POST, PUT, DELETE", "Spring MVC @RestController")
 
-    Component(AnimalRepository, "AnimalRepository", "Acesso a dados (JPA) para animais", "JPA/Hibernate")
-    Component(UsuarioRepository, "UsuarioRepository", "Acesso a dados (JPA) para usuários", "JPA/Hibernate")
+    ' Repositories (camada de acesso a dados)
+    Component(AnimalRepository, "AnimalRepository", "Acesso a dados de animais; inclui consulta por habitat (findByHabitatId)", "Spring Data JPA")
+    Component(HabitatRepository, "HabitatRepository", "Acesso a dados de habitats", "Spring Data JPA")
+    Component(UsuarioRepository, "UsuarioRepository", "Acesso a dados de usuários", "Spring Data JPA")
+
+    ' Configuração
+    Component(WebConfig, "WebConfig", "Configura CORS permitindo acesso do front-end", "Spring @Configuration")
 }
 
-ContainerDb(DB, "Banco de Dados", "MySQL", "Persistência de dados")
+ContainerDb(DB, "Banco de Dados", "MySQL", "Tabelas: animal, habitat, usuario,\nhabitat_requerimentos, habitat_enriquecimentos")
 
-' Relacionamentos principais
-Rel(AnimalController, AnimalService, "Chama")
-Rel(UsuarioController, UsuarioService, "Chama")
-
-Rel(AnimalService, AnimalRepository, "Usa")
-Rel(UsuarioService, UsuarioRepository, "Usa")
+' Controllers chamam diretamente os repositories (sem camada de serviço)
+Rel(AnimalController, AnimalRepository, "Usa diretamente")
+Rel(AnimalController, HabitatRepository, "Busca habitat para vincular ao animal")
+Rel(HabitatController, HabitatRepository, "Usa diretamente")
+Rel(UsuarioController, UsuarioRepository, "Usa diretamente")
 
 Rel(AnimalRepository, DB, "Lê/Escreve")
+Rel(HabitatRepository, DB, "Lê/Escreve")
 Rel(UsuarioRepository, DB, "Lê/Escreve")
 
 @enduml

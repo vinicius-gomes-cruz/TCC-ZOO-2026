@@ -2,6 +2,8 @@
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 title Sistema de Gerenciamento de Zoológico – Diagrama de Containers (C2)
 
+LAYOUT_LEFT_RIGHT()
+
 ' Pessoas (atores)
 Person(Funcionario, "Funcionário", "Gerencia animais e habitats do zoológico")
 Person(Administrador, "Administrador", "Gerencia usuários e acessa configurações do sistema")

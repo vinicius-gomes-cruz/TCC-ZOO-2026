@@ -7,10 +7,10 @@ Person(Funcionario, "Funcionário", "Gerencia operações do zoológico")
 Person(Administrador, "Administrador", "Administração do sistema")
 
 ' Sistema principal
-System(Sistema, "Sistema de Gerenciamento do Zoológico", "Gerencia animais, habitats, estoque e usuários")
+System(Sistema, "Sistema de Gerenciamento do Zoológico", "Gerencia animais, habitats e usuários do zoológico;\nacessado via navegador web")
 
 ' Relacionamentos
-Rel(Funcionario, Sistema, "Utiliza")
-Rel(Administrador, Sistema, "Administra")
+Rel(Funcionario, Sistema, "Cadastra e consulta animais e habitats")
+Rel(Administrador, Sistema, "Gerencia usuários e configurações do sistema")
 
 @enduml
