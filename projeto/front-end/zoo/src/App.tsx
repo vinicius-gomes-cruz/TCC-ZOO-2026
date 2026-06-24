@@ -2,8 +2,10 @@ import { useState } from 'react'
 import './App.css'
 import HabitatPage, { type Habitat } from './pages/HabitatPage'
 import HabitatAnimalsPage from './pages/HabitatAnimalsPage'
+import BioterioPage from './pages/BioterioPage'
+import EstoquePage from './pages/EstoquePage'
 
-type Page = 'habitats' | 'habitat-animals'
+type Page = 'habitats' | 'habitat-animals' | 'bioterio' | 'estoque'
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('habitats')
@@ -37,14 +39,21 @@ function App() {
             <span className="nav-icon">🌿</span>
             Habitats
           </button>
-        </nav>
-
-        <div className="sidebar-footer">
-          <button className="nav-item">
-            <span className="nav-icon">⚙️</span>
-            Configurações
+          <button
+            className={`nav-item ${currentPage === 'bioterio' ? 'active' : ''}`}
+            onClick={() => setCurrentPage('bioterio')}
+          >
+            <span className="nav-icon">🧬</span>
+            Bioterio
           </button>
-        </div>
+          <button
+            className={`nav-item ${currentPage === 'estoque' ? 'active' : ''}`}
+            onClick={() => setCurrentPage('estoque')}
+          >
+            <span className="nav-icon">📦</span>
+            Estoque
+          </button>
+        </nav>
       </aside>
 
       {/* Right side */}
@@ -66,6 +75,8 @@ function App() {
           {currentPage === 'habitat-animals' && selectedHabitat && (
             <HabitatAnimalsPage habitat={selectedHabitat} onBack={backToHabitats} />
           )}
+          {currentPage === 'bioterio' && <BioterioPage />}
+          {currentPage === 'estoque' && <EstoquePage />}
         </main>
       </div>
     </div>

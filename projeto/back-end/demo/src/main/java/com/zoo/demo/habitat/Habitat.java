@@ -29,8 +29,7 @@ public class Habitat {
 
     @ElementCollection
     @CollectionTable(name = "habitat_requerimentos", joinColumns = @JoinColumn(name = "habitat_id"))
-    @Column(name = "requerimento")
-    private List<String> requerimentos = new ArrayList<>();
+    private List<Requerimento> requerimentos = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "habitat_animais", joinColumns = @JoinColumn(name = "habitat_id"))
@@ -39,8 +38,7 @@ public class Habitat {
 
     @ElementCollection
     @CollectionTable(name = "habitat_enriquecimentos", joinColumns = @JoinColumn(name = "habitat_id"))
-    @Column(name = "enriquecimento")
-    private List<String> enriquecimentoAmbiental = new ArrayList<>();
+    private List<EnriquecimentoAmbiental> enriquecimentoAmbiental = new ArrayList<>();
 
     public Habitat() {
     }
