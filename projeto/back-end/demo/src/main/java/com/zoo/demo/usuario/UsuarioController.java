@@ -11,51 +11,54 @@ import java.util.List;
 public class UsuarioController {
 
     private final UsuarioRepository repository;
+    private final UsuarioAuthService usuarioAuthService;
 
-    public UsuarioController(UsuarioRepository repository) {
+    public UsuarioController(UsuarioRepository repository, UsuarioAuthService usuarioAuthService) {
         this.repository = repository;
+        this.usuarioAuthService = usuarioAuthService;
     }
 
     @GetMapping
-    public List<Usuario> all() {
-        return repository.findAll();
+    public List<UsuarioResponse> all(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        usuarioAuthService.exigirAdministrador(authorizationHeader);
+        return repository.findAll().stream().map(UsuarioResponse::from).toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> getById(@PathVariable Long id) {
+    public ResponseEntity<UsuarioResponse> getById(@PathVariable Long id,
+                                                   @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        usuarioAuthService.exigirAdministrador(authorizationHeader);
         return repository.findById(id)
+                .map(UsuarioResponse::from)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Usuario> create(@RequestBody UsuarioRequest request) {
-        Usuario usuario = new Usuario();
-        usuario.setNome(request.getNome());
-        usuario.setEmail(request.getEmail());
-        usuario.setSenha(request.getSenha());
-        usuario.setPerfil(request.getPerfil());
-
-        Usuario saved = repository.save(usuario);
-        return ResponseEntity.created(URI.create("/api/usuarios/" + saved.getId())).body(saved);
+    public ResponseEntity<UsuarioResponse> create(@RequestBody UsuarioRequest request,
+                                                  @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        usuarioAuthService.exigirAdministrador(authorizationHeader);
+        Usuario saved = usuarioAuthService.criarUsuario(request);
+        return ResponseEntity.created(URI.create("/api/usuarios/" + saved.getId())).body(UsuarioResponse.from(saved));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> update(@PathVariable Long id, @RequestBody UsuarioRequest request) {
+    public ResponseEntity<UsuarioResponse> update(@PathVariable Long id,
+                                                  @RequestBody UsuarioRequest request,
+                                                  @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        usuarioAuthService.exigirAdministrador(authorizationHeader);
         return repository.findById(id)
                 .map(existing -> {
-                    existing.setNome(request.getNome());
-                    existing.setEmail(request.getEmail());
-                    existing.setSenha(request.getSenha());
-                    existing.setPerfil(request.getPerfil());
-                    Usuario updated = repository.save(existing);
-                    return ResponseEntity.ok(updated);
+                    Usuario updated = usuarioAuthService.atualizarUsuario(existing, request);
+                    return ResponseEntity.ok(UsuarioResponse.from(updated));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id,
+                                       @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        usuarioAuthService.exigirAdministrador(authorizationHeader);
         return repository.findById(id)
                 .map(existing -> {
                     repository.deleteById(id);

@@ -4,12 +4,30 @@ import HabitatPage, { type Habitat } from './pages/HabitatPage'
 import HabitatAnimalsPage from './pages/HabitatAnimalsPage'
 import BioterioPage from './pages/BioterioPage'
 import EstoquePage from './pages/EstoquePage'
+import LoginPage from './pages/LoginPage'
 
 type Page = 'habitats' | 'habitat-animals' | 'bioterio' | 'estoque'
+type UsuarioLogado = { nome: string; email: string }
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('habitats')
   const [selectedHabitat, setSelectedHabitat] = useState<Habitat | null>(null)
+  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioLogado | null>(null)
+
+  const handleLogin = (email: string) => {
+    const nome = email.split('@')[0]?.trim() || 'Usuário'
+    setUsuarioLogado({ nome, email })
+  }
+
+  const handleLogout = () => {
+    setUsuarioLogado(null)
+    setCurrentPage('habitats')
+    setSelectedHabitat(null)
+  }
+
+  if (!usuarioLogado) {
+    return <LoginPage onLogin={handleLogin} />
+  }
 
   const openHabitatAnimals = (habitat: Habitat) => {
     setSelectedHabitat(habitat)
@@ -54,6 +72,13 @@ function App() {
             Estoque
           </button>
         </nav>
+
+        <div className="sidebar-footer">
+          <button className="nav-item nav-item-logout" onClick={handleLogout}>
+            <span className="nav-icon">🚪</span>
+            Sair
+          </button>
+        </div>
       </aside>
 
       {/* Right side */}
@@ -67,6 +92,10 @@ function App() {
               </button>
             )}
           </nav>
+
+          <div className="topbar-right">
+            <span className="user-badge">{usuarioLogado.nome}</span>
+          </div>
         </header>
 
         {/* Page content */}
