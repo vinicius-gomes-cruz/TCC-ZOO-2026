@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { createCaixa, getCaixas, updateCaixa, type CaixaRequestPayload } from '../api'
+import { createCaixa, deleteCaixa, getCaixas, updateCaixa, type CaixaRequestPayload } from '../api'
 
 type Caixa = {
   id: number
@@ -50,6 +50,21 @@ export default function BioterioPage() {
     try {
       setSaving(true)
       await createCaixa({})
+      load()
+    } catch (e) {
+      setError(String(e))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async (caixa: Caixa) => {
+    if (!window.confirm(`Deseja excluir a Caixa #${caixa.id}?`)) return
+
+    try {
+      setSaving(true)
+      setError(null)
+      await deleteCaixa(caixa.id)
       load()
     } catch (e) {
       setError(String(e))
@@ -147,9 +162,14 @@ export default function BioterioPage() {
                 <td>{textoOuTraco(caixa.machosRotativos)}</td>
                 <td>{textoOuTraco(caixa.observacoes)}</td>
                 <td>
-                  <button className="btn-secondary" onClick={() => openEdit(caixa)}>
-                    Editar
-                  </button>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn-secondary" onClick={() => openEdit(caixa)} disabled={saving}>
+                      Editar
+                    </button>
+                    <button className="btn-secondary" onClick={() => handleDelete(caixa)} disabled={saving}>
+                      Excluir
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

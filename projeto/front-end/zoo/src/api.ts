@@ -149,6 +149,17 @@ export async function updateCaixa(id: number, payload: CaixaRequestPayload) {
   return handleResponse(res)
 }
 
+export async function deleteCaixa(id: number) {
+  const res = await fetch(`${API_BASE}/api/caixas/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status} - ${res.statusText}`)
+  }
+}
+
 export async function getAnimalsByHabitat(habitatId: number) {
   const res = await fetch(`${API_BASE}/api/animais/habitat/${habitatId}`, {
     credentials: 'include',
