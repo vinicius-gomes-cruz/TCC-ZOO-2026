@@ -111,6 +111,44 @@ export async function deleteHabitat(id: number) {
   if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`)
 }
 
+/* ── Biotério (Caixas) ─────────────────────────────────────── */
+
+export type CaixaRequestPayload = {
+  numeroCaixa?: number | null
+  grupoFemeas?: string | null
+  idadeFemeas?: string | null
+  crias?: string | null
+  machosRotativos?: string | null
+  observacoes?: string | null
+}
+
+export async function getCaixas() {
+  const res = await fetch(`${API_BASE}/api/caixas`, {
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function createCaixa(payload: CaixaRequestPayload) {
+  const res = await fetch(`${API_BASE}/api/caixas`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function updateCaixa(id: number, payload: CaixaRequestPayload) {
+  const res = await fetch(`${API_BASE}/api/caixas/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
 export async function getAnimalsByHabitat(habitatId: number) {
   const res = await fetch(`${API_BASE}/api/animais/habitat/${habitatId}`, {
     credentials: 'include',
