@@ -5,6 +5,8 @@ import java.time.LocalDate;
 public class AlimentacaoRequest {
     private String nome;
     private String tipo;
+    private String cardapio;
+    private String diaSemana;
     private Integer quantidade;
     private LocalDate dataChegada;
     private LocalDate dataAbertura;
@@ -34,6 +36,22 @@ public class AlimentacaoRequest {
 
     public void setTipo(String tipo) {
         this.tipo = tipo;
+    }
+
+    public String getCardapio() {
+        return cardapio;
+    }
+
+    public void setCardapio(String cardapio) {
+        this.cardapio = cardapio;
+    }
+
+    public String getDiaSemana() {
+        return diaSemana;
+    }
+
+    public void setDiaSemana(String diaSemana) {
+        this.diaSemana = diaSemana;
     }
 
     public Integer getQuantidade() {

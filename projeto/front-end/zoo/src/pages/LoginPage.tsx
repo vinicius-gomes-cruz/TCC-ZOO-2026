@@ -1,16 +1,18 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { login, type UsuarioLoginResponse } from '../api'
 
 type LoginPageProps = {
-  onLogin: (email: string) => void
+  onLogin: (usuario: UsuarioLoginResponse) => void
 }
 
 function LoginPage({ onLogin }: LoginPageProps) {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [erro, setErro] = useState('')
+  const [carregando, setCarregando] = useState(false)
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setErro('')
 
@@ -19,7 +21,15 @@ function LoginPage({ onLogin }: LoginPageProps) {
       return
     }
 
-    onLogin(email.trim())
+    try {
+      setCarregando(true)
+      const usuario = await login({ email: email.trim(), senha: senha.trim() })
+      onLogin(usuario)
+    } catch {
+      setErro('E-mail ou senha inválidos.')
+    } finally {
+      setCarregando(false)
+    }
   }
 
   return (
@@ -52,8 +62,8 @@ function LoginPage({ onLogin }: LoginPageProps) {
 
           {erro && <p className="login-error">{erro}</p>}
 
-          <button type="submit" className="btn-primary login-submit">
-            Entrar
+          <button type="submit" className="btn-primary login-submit" disabled={carregando}>
+            {carregando ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
       </div>

@@ -1,12 +1,15 @@
 package com.zoo.demo.estoque;
 
-import com.zoo.demo.animal.Animal;
-import com.zoo.demo.animal.AnimalRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.zoo.demo.animal.Animal;
+import com.zoo.demo.animal.AnimalRepository;
 
 @Service
 @Transactional
@@ -26,6 +29,13 @@ public class AlimentacaoService {
         Alimentacao alimentacao = new Alimentacao();
         alimentacao.setNome(request.getNome());
         alimentacao.setTipo(request.getTipo());
+        alimentacao.setCardapio(request.getCardapio() != null && !request.getCardapio().isBlank()
+            ? request.getCardapio().trim()
+            : "Cardápio Semanal");
+        String diaSemana = request.getDiaSemana() != null && !request.getDiaSemana().isBlank()
+            ? request.getDiaSemana().trim().toUpperCase()
+            : null;
+        alimentacao.setDiaSemana(diaSemana != null ? diaSemana : mapearDiaSemana(LocalDate.now().getDayOfWeek()));
         alimentacao.setQuantidade(request.getQuantidade());
         alimentacao.setDataChegada(request.getDataChegada() != null ? request.getDataChegada() : LocalDate.now());
         alimentacao.setAnimal(animal);
@@ -63,5 +73,17 @@ public class AlimentacaoService {
 
     public void deletarAlimentacao(Long id) {
         alimentacaoRepository.deleteById(id);
+    }
+
+    private String mapearDiaSemana(DayOfWeek dayOfWeek) {
+        return switch (dayOfWeek) {
+            case MONDAY -> "SEGUNDA";
+            case TUESDAY -> "TERCA";
+            case WEDNESDAY -> "QUARTA";
+            case THURSDAY -> "QUINTA";
+            case FRIDAY -> "SEXTA";
+            case SATURDAY -> "SABADO";
+            case SUNDAY -> "DOMINGO";
+        };
     }
 }

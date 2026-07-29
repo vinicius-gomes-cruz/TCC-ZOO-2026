@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react'
 import {
   criarAlimentacao,
   listarAlimentacoesPorAnimal,
-  registrarAberturaAlimentacao,
-  registrarTerminoAlimentacao,
   deletarAlimentacao,
   getAnimalsByHabitat,
   getHabitats,
@@ -13,11 +11,22 @@ interface Alimentacao {
   id: number
   nome: string
   tipo: string
+  cardapio?: string | null
+  diaSemana?: string | null
   quantidade: number
   dataChegada: string
   dataAbertura: string | null
   dataTermino: string | null
 }
+
+type DiaSemana =
+  | 'SEGUNDA'
+  | 'TERCA'
+  | 'QUARTA'
+  | 'QUINTA'
+  | 'SEXTA'
+  | 'SABADO'
+  | 'DOMINGO'
 
 interface Animal {
   id: number
@@ -31,9 +40,34 @@ interface Habitat {
 }
 
 const emptyForm = {
+  cardapio: 'Cardápio Semanal',
+  diaSemana: 'SEGUNDA' as DiaSemana,
   nome: '',
-  tipo: '',
-  quantidade: '',
+}
+
+const diasSemanaOptions: Array<{ value: DiaSemana; label: string }> = [
+  { value: 'SEGUNDA', label: 'Segunda-feira' },
+  { value: 'TERCA', label: 'Terça-feira' },
+  { value: 'QUARTA', label: 'Quarta-feira' },
+  { value: 'QUINTA', label: 'Quinta-feira' },
+  { value: 'SEXTA', label: 'Sexta-feira' },
+  { value: 'SABADO', label: 'Sábado' },
+  { value: 'DOMINGO', label: 'Domingo' },
+]
+
+const diaSemanaOrdem: Record<DiaSemana, number> = {
+  SEGUNDA: 1,
+  TERCA: 2,
+  QUARTA: 3,
+  QUINTA: 4,
+  SEXTA: 5,
+  SABADO: 6,
+  DOMINGO: 7,
+}
+
+const formatarDiaSemana = (dia?: string | null) => {
+  const option = diasSemanaOptions.find((item) => item.value === dia)
+  return option?.label ?? (dia || 'A definir')
 }
 
 export default function EstoquePage() {
@@ -107,45 +141,14 @@ export default function EstoquePage() {
     setSaving(true)
     try {
       const payload = {
+        cardapio: form.cardapio,
+        diaSemana: form.diaSemana,
         nome: form.nome,
-        tipo: form.tipo,
-        quantidade: parseInt(form.quantidade),
-        dataChegada: new Date().toISOString().split('T')[0],
       }
       await criarAlimentacao(animalIdSelecionado, payload)
       await loadAlimentacoes(animalIdSelecionado)
       setShowModal(false)
       setForm(emptyForm)
-      setError(null)
-    } catch (err) {
-      setError(String(err))
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleAbrirAlimentacao = async (id: number) => {
-    setSaving(true)
-    try {
-      await registrarAberturaAlimentacao(id)
-      if (animalIdSelecionado) {
-        await loadAlimentacoes(animalIdSelecionado)
-      }
-      setError(null)
-    } catch (err) {
-      setError(String(err))
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleTerminarAlimentacao = async (id: number) => {
-    setSaving(true)
-    try {
-      await registrarTerminoAlimentacao(id)
-      if (animalIdSelecionado) {
-        await loadAlimentacoes(animalIdSelecionado)
-      }
       setError(null)
     } catch (err) {
       setError(String(err))
@@ -173,12 +176,34 @@ export default function EstoquePage() {
 
   const animalSelecionado = animaisSelecionados.find((a) => a.id === animalIdSelecionado)
 
+  const alimentacoesPorCardapio = alimentacoes.reduce<Record<string, Alimentacao[]>>((acc, item) => {
+    const cardapio = item.cardapio?.trim() || 'Cardápio Semanal'
+    if (!acc[cardapio]) {
+      acc[cardapio] = []
+    }
+    acc[cardapio].push(item)
+    return acc
+  }, {})
+
+  const cardapiosOrdenados = Object.entries(alimentacoesPorCardapio)
+    .sort(([a], [b]) => a.localeCompare(b, 'pt-BR'))
+    .map(([cardapio, lista]) => ({
+      cardapio,
+      itens: [...lista].sort((x, y) => {
+        const ordemX = x.diaSemana ? diaSemanaOrdem[x.diaSemana as DiaSemana] ?? 99 : 99
+        const ordemY = y.diaSemana ? diaSemanaOrdem[y.diaSemana as DiaSemana] ?? 99 : 99
+
+        if (ordemX !== ordemY) return ordemX - ordemY
+        return x.nome.localeCompare(y.nome, 'pt-BR')
+      }),
+    }))
+
   return (
     <div className="page">
       <div className="page-header">
         <div>
           <h1 className="page-title">Estoque de Alimentação</h1>
-          <p className="page-subtitle">Gerencie o estoque de alimentos dos animais</p>
+          <p className="page-subtitle">Organize os cardápios semanais com a alimentação de cada dia</p>
         </div>
         <button 
           className="btn-primary" 
@@ -264,89 +289,52 @@ export default function EstoquePage() {
                   <p>Nenhuma alimentação registrada para este animal.</p>
                 </div>
               ) : (
-                <div className="table-container">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Produto</th>
-                        <th>Tipo</th>
-                        <th>Quantidade</th>
-                        <th>Data Chegada</th>
-                        <th>Data Abertura</th>
-                        <th>Data Término</th>
-                        <th>Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {alimentacoes.map((alimentacao) => (
-                        <tr key={alimentacao.id}>
-                          <td className="font-weight-bold">{alimentacao.nome}</td>
-                          <td>{alimentacao.tipo}</td>
-                          <td className="text-center">{alimentacao.quantidade}</td>
-                          <td className="text-muted">
-                            {new Date(alimentacao.dataChegada).toLocaleDateString('pt-BR')}
-                          </td>
-                          <td className="text-muted">
-                            {alimentacao.dataAbertura
-                              ? new Date(alimentacao.dataAbertura).toLocaleDateString('pt-BR')
-                              : '—'}
-                          </td>
-                          <td className="text-muted">
-                            {alimentacao.dataTermino
-                              ? new Date(alimentacao.dataTermino).toLocaleDateString('pt-BR')
-                              : '—'}
-                          </td>
-                          <td>
-                            <div className="action-menu">
-                              <button
-                                className="action-btn"
-                                onClick={() => setOpenMenuId(openMenuId === alimentacao.id ? null : alimentacao.id)}
-                                title="Mais ações"
-                              >
-                                ⋯
-                              </button>
-                              {openMenuId === alimentacao.id && (
-                                <div className="action-dropdown">
-                                  {!alimentacao.dataAbertura && (
-                                    <button
-                                      className="action-item"
-                                      onClick={() => {
-                                        setOpenMenuId(null)
-                                        handleAbrirAlimentacao(alimentacao.id)
-                                      }}
-                                    >
-                                      ✓ Registrar Abertura
-                                    </button>
-                                  )}
-                                  {alimentacao.dataAbertura && !alimentacao.dataTermino && (
-                                    <button
-                                      className="action-item"
-                                      onClick={() => {
-                                        setOpenMenuId(null)
-                                        handleTerminarAlimentacao(alimentacao.id)
-                                      }}
-                                    >
-                                      ✓ Registrar Término
-                                    </button>
-                                  )}
-                                  <button
-                                    className="action-item danger"
-                                    onClick={() => {
-                                      setOpenMenuId(null)
-                                      handleDeleteAlimentacao(alimentacao.id)
-                                    }}
-                                  >
-                                    🗑️ Excluir
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </td>
+                cardapiosOrdenados.map(({ cardapio, itens }) => (
+                  <div key={cardapio} className="table-container" style={{ marginBottom: 16 }}>
+                    <h3 className="section-title section-title-cardapio">{cardapio}</h3>
+                    <table className="table table-cardapio">
+                      <thead>
+                        <tr>
+                          <th>Dia da Semana</th>
+                          <th>Alimentação do Dia</th>
+                          <th className="col-acoes">Ações</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {itens.map((alimentacao) => (
+                          <tr key={alimentacao.id}>
+                            <td>{formatarDiaSemana(alimentacao.diaSemana)}</td>
+                            <td className="font-weight-bold">{alimentacao.nome}</td>
+                            <td className="col-acoes">
+                              <div className="action-menu">
+                                <button
+                                  className="action-btn"
+                                  onClick={() => setOpenMenuId(openMenuId === alimentacao.id ? null : alimentacao.id)}
+                                  title="Mais ações"
+                                >
+                                  ⋯
+                                </button>
+                                {openMenuId === alimentacao.id && (
+                                  <div className="action-dropdown">
+                                    <button
+                                      className="action-item danger"
+                                      onClick={() => {
+                                        setOpenMenuId(null)
+                                        handleDeleteAlimentacao(alimentacao.id)
+                                      }}
+                                    >
+                                      🗑️ Excluir
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))
               )}
             </>
           )}
@@ -358,36 +346,40 @@ export default function EstoquePage() {
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Novo Item de Alimentação</h2>
+              <h2>Novo Item do Cardápio</h2>
               <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
             </div>
             <form onSubmit={handleSubmit} className="modal-form">
               <label>
-                Nome do Produto <span className="required">*</span>
+                Cardápio <span className="required">*</span>
                 <input
                   required
-                  placeholder="Ex: Ração Premium"
+                  placeholder="Ex: Cardápio Semanal Primatas"
+                  value={form.cardapio}
+                  onChange={(e) => setForm({ ...form, cardapio: e.target.value })}
+                />
+              </label>
+              <label>
+                Dia da Semana <span className="required">*</span>
+                <select
+                  required
+                  value={form.diaSemana}
+                  onChange={(e) => setForm({ ...form, diaSemana: e.target.value as DiaSemana })}
+                >
+                  {diasSemanaOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                O que o animal vai comer <span className="required">*</span>
+                <input
+                  required
+                  placeholder="Ex: Banana, folhas e legumes"
                   value={form.nome}
                   onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                />
-              </label>
-              <label>
-                Tipo <span className="required">*</span>
-                <input
-                  required
-                  placeholder="Ex: Ração, Frutas, Verduras"
-                  value={form.tipo}
-                  onChange={(e) => setForm({ ...form, tipo: e.target.value })}
-                />
-              </label>
-              <label>
-                Quantidade <span className="required">*</span>
-                <input
-                  required
-                  type="number"
-                  placeholder="Ex: 50"
-                  value={form.quantidade}
-                  onChange={(e) => setForm({ ...form, quantidade: e.target.value })}
                 />
               </label>
               <div className="modal-buttons">

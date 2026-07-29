@@ -1,5 +1,22 @@
 export const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
+export type PerfilUsuario = 'ADMINISTRADOR' | 'FUNCIONARIO'
+
+export type UsuarioLoginResponse = {
+  token: string
+  id: number
+  nome: string
+  email: string
+  perfil: PerfilUsuario
+}
+
+export type UsuarioAutenticadoResponse = {
+  id: number
+  nome: string
+  email: string
+  perfil: PerfilUsuario
+}
+
 async function handleResponse(res: Response) {
   if (!res.ok) {
     const text = await res.text().catch(() => '')
@@ -45,6 +62,35 @@ export async function deleteHabitat(id: number) {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
+}
+
+/* ── Autenticação ───────────────────────────────────────────── */
+
+export async function login(payload: { email: string; senha: string }): Promise<UsuarioLoginResponse> {
+  const res = await fetch(`${API_BASE}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  return handleResponse(res)
+}
+
+export async function obterUsuarioAutenticado(token: string): Promise<UsuarioAutenticadoResponse> {
+  const res = await fetch(`${API_BASE}/api/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  return handleResponse(res)
+}
+
+export async function logout(token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/auth/logout`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+
+  if (!res.ok && res.status !== 401) {
+    throw new Error(`HTTP ${res.status} - ${res.statusText}`)
+  }
 }
 
 /* ── Animais ─────────────────────────────────────────────────── */

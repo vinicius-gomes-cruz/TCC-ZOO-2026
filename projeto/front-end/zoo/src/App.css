@@ -154,6 +154,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-left: auto;
 }
 
 .icon-btn {
@@ -173,10 +174,23 @@
 .user-badge {
   background: #2e7d32;
   color: #fff;
+  padding: 8px 14px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.1;
+}
+
+.user-name {
   font-size: 13px;
-  font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 20px;
+  font-weight: 700;
+}
+
+.user-profile {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.9;
 }
 
 /* ─── Content area ──────────────────────────────────────────── */
@@ -616,6 +630,7 @@
 }
 
 .modal-form input,
+.modal-form select,
 .modal-form textarea {
   width: 100%;
   padding: 9px 12px;
@@ -631,6 +646,7 @@
 }
 
 .modal-form input:focus,
+.modal-form select:focus,
 .modal-form textarea:focus {
   outline: none;
   border-color: #2e7d32;
@@ -1105,10 +1121,12 @@
 /* ─── Table Container ───────────────────────────────────────── */
 .table-container {
   overflow-x: auto;
+  overflow-y: visible;
   background: #ffffff;
   border-radius: 12px;
   border: 1px solid #e8eaed;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+  position: relative;
 }
 
 .table {
@@ -1145,6 +1163,18 @@
 
 .table tbody tr:hover {
   background: #fafbfc;
+}
+
+.section-title-cardapio {
+  margin: 0;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f0f2f5;
+  font-size: 18px;
+}
+
+.table-cardapio .col-acoes {
+  width: 80px;
+  text-align: center;
 }
 
 .font-weight-bold {
@@ -1184,16 +1214,14 @@
 }
 
 .action-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
-  min-width: 160px;
+  position: fixed;
   background: #fff;
   border: 1px solid #e8eaed;
   border-radius: 10px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
   padding: 6px;
-  z-index: 20;
+  z-index: 1000;
+  min-width: 160px;
 }
 
 .action-item {
