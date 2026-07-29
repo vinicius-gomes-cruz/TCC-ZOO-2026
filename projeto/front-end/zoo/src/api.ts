@@ -3,7 +3,8 @@ export const API_BASE = import.meta.env.VITE_API_URL ?? '';
 export type PerfilUsuario = 'ADMINISTRADOR' | 'FUNCIONARIO'
 
 export type UsuarioLoginResponse = {
-  token: string
+  accessToken: string
+  refreshToken: string
   id: number
   nome: string
   email: string
@@ -30,38 +31,7 @@ async function handleResponse(res: Response) {
     return res.json()
   }
 
-  // Fallback: return raw text for easier debugging
   return res.text()
-}
-
-export async function getHabitats() {
-  const res = await fetch(`${API_BASE}/api/habitats`);
-  return handleResponse(res);
-}
-
-export async function createHabitat(payload: any) {
-  const res = await fetch(`${API_BASE}/api/habitats`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  return handleResponse(res);
-}
-
-export async function updateHabitat(id: number, payload: any) {
-  const res = await fetch(`${API_BASE}/api/habitats/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  return handleResponse(res);
-}
-
-export async function deleteHabitat(id: number) {
-  const res = await fetch(`${API_BASE}/api/habitats/${id}`, {
-    method: 'DELETE',
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
 }
 
 /* ── Autenticação ───────────────────────────────────────────── */
@@ -71,21 +41,32 @@ export async function login(payload: { email: string; senha: string }): Promise<
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+    credentials: 'include',
   })
   return handleResponse(res)
 }
 
-export async function obterUsuarioAutenticado(token: string): Promise<UsuarioAutenticadoResponse> {
+export async function refresh(): Promise<UsuarioLoginResponse> {
+  const res = await fetch(`${API_BASE}/api/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function obterUsuarioAutenticado(): Promise<UsuarioAutenticadoResponse> {
   const res = await fetch(`${API_BASE}/api/auth/me`, {
-    headers: { Authorization: `Bearer ${token}` },
+    credentials: 'include',
   })
   return handleResponse(res)
 }
 
-export async function logout(token: string): Promise<void> {
+export async function logout(): Promise<void> {
   const res = await fetch(`${API_BASE}/api/auth/logout`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
   })
 
   if (!res.ok && res.status !== 401) {
@@ -93,10 +74,47 @@ export async function logout(token: string): Promise<void> {
   }
 }
 
-/* ── Animais ─────────────────────────────────────────────────── */
+/* ── Habitats ────────────────────────────────────────────── */
+
+export async function getHabitats() {
+  const res = await fetch(`${API_BASE}/api/habitats`, {
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function createHabitat(payload: any) {
+  const res = await fetch(`${API_BASE}/api/habitats`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function updateHabitat(id: number, payload: any) {
+  const res = await fetch(`${API_BASE}/api/habitats/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function deleteHabitat(id: number) {
+  const res = await fetch(`${API_BASE}/api/habitats/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`)
+}
 
 export async function getAnimalsByHabitat(habitatId: number) {
-  const res = await fetch(`${API_BASE}/api/animais/habitat/${habitatId}`);
+  const res = await fetch(`${API_BASE}/api/animais/habitat/${habitatId}`, {
+    credentials: 'include',
+  });
   return handleResponse(res);
 }
 
@@ -105,6 +123,7 @@ export async function createAnimal(payload: any) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+    credentials: 'include',
   });
   return handleResponse(res);
 }
@@ -114,6 +133,7 @@ export async function updateAnimal(id: number, payload: any) {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+    credentials: 'include',
   });
   return handleResponse(res);
 }
@@ -121,6 +141,7 @@ export async function updateAnimal(id: number, payload: any) {
 export async function deleteAnimal(id: number) {
   const res = await fetch(`${API_BASE}/api/animais/${id}`, {
     method: 'DELETE',
+    credentials: 'include',
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
 }
@@ -132,22 +153,29 @@ export async function criarAlimentacao(animalId: number, payload: any) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+    credentials: 'include',
   });
   return handleResponse(res);
 }
 
 export async function listarAlimentacoesPorAnimal(animalId: number) {
-  const res = await fetch(`${API_BASE}/api/estoque/animal/${animalId}/alimentacoes`);
+  const res = await fetch(`${API_BASE}/api/estoque/animal/${animalId}/alimentacoes`, {
+    credentials: 'include',
+  });
   return handleResponse(res);
 }
 
 export async function listarAlimentacoesAbertas(animalId: number) {
-  const res = await fetch(`${API_BASE}/api/estoque/animal/${animalId}/alimentacoes/abertas`);
+  const res = await fetch(`${API_BASE}/api/estoque/animal/${animalId}/alimentacoes/abertas`, {
+    credentials: 'include',
+  });
   return handleResponse(res);
 }
 
 export async function obterAlimentacao(id: number) {
-  const res = await fetch(`${API_BASE}/api/estoque/alimentacao/${id}`);
+  const res = await fetch(`${API_BASE}/api/estoque/alimentacao/${id}`, {
+    credentials: 'include',
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
   return res.json();
 }
@@ -159,6 +187,7 @@ export async function registrarAberturaAlimentacao(id: number, data?: string) {
   const res = await fetch(url, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
   return res.json();
@@ -171,6 +200,7 @@ export async function registrarTerminoAlimentacao(id: number, data?: string) {
   const res = await fetch(url, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
   return res.json();
@@ -179,6 +209,7 @@ export async function registrarTerminoAlimentacao(id: number, data?: string) {
 export async function deletarAlimentacao(id: number) {
   const res = await fetch(`${API_BASE}/api/estoque/alimentacao/${id}`, {
     method: 'DELETE',
+    credentials: 'include',
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
 }

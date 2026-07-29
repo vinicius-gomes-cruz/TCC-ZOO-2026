@@ -14,11 +14,15 @@ public class UsuarioAuthService {
 
     private final UsuarioRepository usuarioRepository;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public UsuarioAuthService(UsuarioRepository usuarioRepository, JwtService jwtService) {
+    public UsuarioAuthService(UsuarioRepository usuarioRepository, 
+                            JwtService jwtService,
+                            RefreshTokenService refreshTokenService) {
         this.usuarioRepository = usuarioRepository;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
@@ -46,13 +50,31 @@ public class UsuarioAuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciais inválidas");
         }
 
-        String token = jwtService.gerarToken(usuario);
+        String accessToken = jwtService.gerarAccessToken(usuario);
+        RefreshToken refreshToken = refreshTokenService.criarRefreshToken(usuario);
 
-        return new UsuarioLoginResponse(token, usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPerfil());
+        return new UsuarioLoginResponse(accessToken, refreshToken.getToken(), usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPerfil());
     }
 
-    public void logout(String authorizationHeader) {
-        usuarioAutenticado(authorizationHeader);
+    public UsuarioLoginResponse refresh(String refreshTokenStr) {
+        RefreshToken refreshToken = refreshTokenService.obterRefreshToken(refreshTokenStr)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token inválido"));
+
+        if (!refreshTokenService.validarRefreshToken(refreshToken)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token expirado ou revogado");
+        }
+
+        Usuario usuario = refreshToken.getUsuario();
+        String newAccessToken = jwtService.gerarAccessToken(usuario);
+
+        return new UsuarioLoginResponse(newAccessToken, refreshTokenStr, usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPerfil());
+    }
+
+    public void logout(String refreshTokenStr) {
+        if (refreshTokenStr != null && !refreshTokenStr.isBlank()) {
+            refreshTokenService.obterRefreshToken(refreshTokenStr)
+                    .ifPresent(refreshTokenService::revogarRefreshToken);
+        }
     }
 
     public Usuario usuarioAutenticado(String authorizationHeader) {

@@ -5,11 +5,21 @@ import HabitatAnimalsPage from './pages/HabitatAnimalsPage'
 import BioterioPage from './pages/BioterioPage'
 import EstoquePage from './pages/EstoquePage'
 import LoginPage from './pages/LoginPage'
-import { logout, obterUsuarioAutenticado, type UsuarioLoginResponse } from './api'
+import { logout, obterUsuarioAutenticado, type UsuarioAutenticadoResponse } from './api'
 
 type Page = 'habitats' | 'habitat-animals' | 'bioterio' | 'estoque'
-type UsuarioLogado = { nome: string; email: string; perfil: UsuarioLoginResponse['perfil']; token: string }
-const SESSION_STORAGE_KEY = 'zooGestor.session'
+type UsuarioLogado = { nome: string; email: string; perfil: UsuarioAutenticadoResponse['perfil'] }
+
+function isUsuarioAutenticadoResponse(value: unknown): value is UsuarioAutenticadoResponse {
+  if (!value || typeof value !== 'object') return false
+
+  const v = value as Record<string, unknown>
+  return (
+    typeof v.nome === 'string' &&
+    typeof v.email === 'string' &&
+    (v.perfil === 'ADMINISTRADOR' || v.perfil === 'FUNCIONARIO')
+  )
+}
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('habitats')
@@ -19,31 +29,21 @@ function App() {
 
   useEffect(() => {
     const restaurarSessao = async () => {
-      const sessaoSalva = localStorage.getItem(SESSION_STORAGE_KEY)
-
-      if (!sessaoSalva) {
-        setCarregandoSessao(false)
-        return
-      }
-
       try {
-        const sessao = JSON.parse(sessaoSalva) as UsuarioLogado
+        const usuarioAtual = await obterUsuarioAutenticado()
 
-        if (!sessao?.token) {
-          localStorage.removeItem(SESSION_STORAGE_KEY)
-          setCarregandoSessao(false)
-          return
+        if (!isUsuarioAutenticadoResponse(usuarioAtual)) {
+          throw new Error('Resposta inválida de /api/auth/me')
         }
 
-        const usuarioAtual = await obterUsuarioAutenticado(sessao.token)
         setUsuarioLogado({
           nome: usuarioAtual.nome,
           email: usuarioAtual.email,
           perfil: usuarioAtual.perfil,
-          token: sessao.token,
         })
       } catch {
-        localStorage.removeItem(SESSION_STORAGE_KEY)
+        // Usuário não autenticado ou sessão expirada
+        setUsuarioLogado(null)
       } finally {
         setCarregandoSessao(false)
       }
@@ -52,16 +52,12 @@ function App() {
     void restaurarSessao()
   }, [])
 
-  const handleLogin = (usuario: UsuarioLoginResponse) => {
-    const sessao: UsuarioLogado = {
+  const handleLogin = (usuario: UsuarioAutenticadoResponse) => {
+    setUsuarioLogado({
       nome: usuario.nome,
       email: usuario.email,
       perfil: usuario.perfil,
-      token: usuario.token,
-    }
-
-    setUsuarioLogado(sessao)
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessao))
+    })
   }
 
   const formatarPerfil = (perfil: UsuarioLogado['perfil']) => {
@@ -71,11 +67,7 @@ function App() {
   }
 
   const handleLogout = () => {
-    if (usuarioLogado?.token) {
-      void logout(usuarioLogado.token)
-    }
-
-    localStorage.removeItem(SESSION_STORAGE_KEY)
+    void logout()
     setUsuarioLogado(null)
     setCurrentPage('habitats')
     setSelectedHabitat(null)

@@ -1,9 +1,20 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { login, type UsuarioLoginResponse } from '../api'
+import { login, type UsuarioAutenticadoResponse, obterUsuarioAutenticado } from '../api'
 
 type LoginPageProps = {
-  onLogin: (usuario: UsuarioLoginResponse) => void
+  onLogin: (usuario: UsuarioAutenticadoResponse) => void
+}
+
+function isUsuarioAutenticadoResponse(value: unknown): value is UsuarioAutenticadoResponse {
+  if (!value || typeof value !== 'object') return false
+
+  const v = value as Record<string, unknown>
+  return (
+    typeof v.nome === 'string' &&
+    typeof v.email === 'string' &&
+    (v.perfil === 'ADMINISTRADOR' || v.perfil === 'FUNCIONARIO')
+  )
 }
 
 function LoginPage({ onLogin }: LoginPageProps) {
@@ -23,7 +34,15 @@ function LoginPage({ onLogin }: LoginPageProps) {
 
     try {
       setCarregando(true)
-      const usuario = await login({ email: email.trim(), senha: senha.trim() })
+      await login({ email: email.trim(), senha: senha.trim() })
+      // Cookies são configurados automaticamente pelo servidor
+      // Agora obter os dados do usuário autenticado
+      const usuario = await obterUsuarioAutenticado()
+
+      if (!isUsuarioAutenticadoResponse(usuario)) {
+        throw new Error('Resposta inválida de /api/auth/me')
+      }
+
       onLogin(usuario)
     } catch {
       setErro('E-mail ou senha inválidos.')

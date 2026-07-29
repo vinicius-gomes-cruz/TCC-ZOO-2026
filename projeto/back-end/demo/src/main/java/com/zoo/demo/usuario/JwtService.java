@@ -22,8 +22,8 @@ public class JwtService {
     @Value("${app.jwt.secret:zoogestor-jwt-secret-change-this-in-production}")
     private String jwtSecret;
 
-    @Value("${app.jwt.expiration-ms:28800000}")
-    private long expirationMs;
+    @Value("${app.jwt.access-token-expiration-ms:900000}")
+    private long accessTokenExpirationMs;
 
     private SecretKey signingKey;
 
@@ -36,9 +36,9 @@ public class JwtService {
         this.signingKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String gerarToken(Usuario usuario) {
+    public String gerarAccessToken(Usuario usuario) {
         Instant now = Instant.now();
-        Instant exp = now.plusMillis(expirationMs);
+        Instant exp = now.plusMillis(accessTokenExpirationMs);
 
         return Jwts.builder()
                 .subject(String.valueOf(usuario.getId()))

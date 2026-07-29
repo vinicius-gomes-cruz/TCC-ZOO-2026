@@ -7,7 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UsuarioLoginResponse {
 
-    private String token;
+    private String accessToken;
+    private String refreshToken;
     private Long id;
     private String nome;
     private String email;

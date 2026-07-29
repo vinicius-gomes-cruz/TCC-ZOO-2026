@@ -21,6 +21,9 @@
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/usuario/AuthController.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/usuario/JwtService.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/usuario/PerfilUsuario.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/usuario/RefreshToken.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/usuario/RefreshTokenRepository.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/usuario/RefreshTokenService.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/usuario/Usuario.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/usuario/UsuarioAuthService.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/usuario/UsuarioBootstrapConfig.java
