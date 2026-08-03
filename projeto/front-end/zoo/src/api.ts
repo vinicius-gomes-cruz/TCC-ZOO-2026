@@ -197,6 +197,30 @@ export async function deleteAnimal(id: number) {
 
 /* ── Estoque de Alimentação ──────────────────────────────────── */
 
+export async function criarAlimentacaoPorHabitat(habitatId: number, payload: any) {
+  const res = await fetch(`${API_BASE}/api/estoque/habitat/${habitatId}/alimentacao`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  });
+  return handleResponse(res);
+}
+
+export async function listarAlimentacoesPorHabitat(habitatId: number) {
+  const res = await fetch(`${API_BASE}/api/estoque/habitat/${habitatId}/alimentacoes`, {
+    credentials: 'include',
+  });
+  return handleResponse(res);
+}
+
+export async function listarAlimentacoesAbertasPorHabitat(habitatId: number) {
+  const res = await fetch(`${API_BASE}/api/estoque/habitat/${habitatId}/alimentacoes/abertas`, {
+    credentials: 'include',
+  });
+  return handleResponse(res);
+}
+
 export async function criarAlimentacao(animalId: number, payload: any) {
   const res = await fetch(`${API_BASE}/api/estoque/animal/${animalId}/alimentacao`, {
     method: 'POST',

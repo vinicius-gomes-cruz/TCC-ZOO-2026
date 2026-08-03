@@ -1,12 +1,13 @@
 package com.zoo.demo.estoque;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.List;
 
 @Repository
 public interface AlimentacaoRepository extends JpaRepository<Alimentacao, Long> {
-    List<Alimentacao> findByAnimalId(Long animalId);
+    List<Alimentacao> findByHabitatId(Long habitatId);
     
-    List<Alimentacao> findByAnimalIdAndDataTerminoIsNull(Long animalId);
+    List<Alimentacao> findByHabitatIdAndDataTerminoIsNull(Long habitatId);
 }

@@ -851,10 +851,13 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
 }
 
 .animals-panel {
   padding: 14px;
+  align-items: stretch;
+  text-align: left;
 }
 
 .animal-chip {
@@ -866,6 +869,8 @@
   border-radius: 8px;
   padding: 6px 10px;
   transition: background 0.15s;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .animal-chip:hover {
@@ -927,46 +932,51 @@
   padding: 2px 8px;
 }
 
-.animal-chip-remove {
-  background: none;
-  border: none;
-  color: #9aa0a6;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 0 2px;
-  line-height: 1;
-  flex-shrink: 0;
-  border-radius: 4px;
-  transition: color 0.15s, background 0.15s;
-}
-
 .animal-chip-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .animal-chip-edit {
-  background: none;
-  border: none;
-  color: #5f6368;
-  font-size: 14px;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  color: #2e7d32;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 8px 12px;
+  min-height: 40px;
   line-height: 1;
   flex-shrink: 0;
-  border-radius: 4px;
-  transition: color 0.15s, background 0.15s;
+  border-radius: 8px;
+  transition: all 0.15s;
 }
 
 .animal-chip-edit:hover {
-  color: #2e7d32;
-  background: #e8f5e9;
+  background: #d7f0da;
+  border-color: #81c784;
+}
+
+.animal-chip-remove {
+  background: #fce8e6;
+  border: 1px solid #f4b8b2;
+  color: #c62828;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+  min-height: 40px;
+  line-height: 1;
+  flex-shrink: 0;
+  border-radius: 8px;
+  transition: all 0.15s;
 }
 
 .animal-chip-remove:hover {
-  color: #c62828;
-  background: #fce8e6;
+  background: #f9d7d3;
+  border-color: #ef9a9a;
 }
 
 /* ─── Modal two-column row ───────────────────────────────────── */
@@ -1188,6 +1198,53 @@
 .text-muted {
   color: #5f6368;
   font-size: 13px;
+}
+
+.cardapio-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cardapio-filter-btn {
+  border: 1px solid #d0d7de;
+  background: #ffffff;
+  color: #3c4043;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 14px;
+  min-height: 40px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cardapio-filter-btn:hover {
+  border-color: #a5d6a7;
+  background: #f5fbf6;
+}
+
+.cardapio-filter-btn.active {
+  background: #e8f5e9;
+  border-color: #66bb6a;
+  color: #1b5e20;
+  font-weight: 600;
+}
+
+.cardapio-filter-btn-all {
+  border-style: dashed;
+  background: #f8f9fb;
+  color: #455a64;
+}
+
+.cardapio-filter-btn-all:hover {
+  border-color: #90a4ae;
+  background: #edf1f4;
+}
+
+.cardapio-filter-btn-all.active {
+  background: #eceff1;
+  border-color: #607d8b;
+  color: #263238;
 }
 
 /* ─── Action Menu ───────────────────────────────────────────── */

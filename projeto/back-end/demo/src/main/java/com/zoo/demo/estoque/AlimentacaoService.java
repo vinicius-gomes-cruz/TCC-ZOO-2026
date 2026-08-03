@@ -8,23 +8,23 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.zoo.demo.animal.Animal;
-import com.zoo.demo.animal.AnimalRepository;
+import com.zoo.demo.habitat.Habitat;
+import com.zoo.demo.habitat.HabitatRepository;
 
 @Service
 @Transactional
 public class AlimentacaoService {
     private final AlimentacaoRepository alimentacaoRepository;
-    private final AnimalRepository animalRepository;
+    private final HabitatRepository habitatRepository;
 
-    public AlimentacaoService(AlimentacaoRepository alimentacaoRepository, AnimalRepository animalRepository) {
+    public AlimentacaoService(AlimentacaoRepository alimentacaoRepository, HabitatRepository habitatRepository) {
         this.alimentacaoRepository = alimentacaoRepository;
-        this.animalRepository = animalRepository;
+        this.habitatRepository = habitatRepository;
     }
 
-    public Alimentacao criarAlimentacao(Long animalId, AlimentacaoRequest request) {
-        Animal animal = animalRepository.findById(animalId)
-                .orElseThrow(() -> new IllegalArgumentException("Animal não encontrado com id: " + animalId));
+    public Alimentacao criarAlimentacaoPorHabitat(Long habitatId, AlimentacaoRequest request) {
+        Habitat habitat = habitatRepository.findById(habitatId)
+                .orElseThrow(() -> new IllegalArgumentException("Habitat não encontrado com id: " + habitatId));
 
         Alimentacao alimentacao = new Alimentacao();
         alimentacao.setNome(request.getNome());
@@ -38,17 +38,17 @@ public class AlimentacaoService {
         alimentacao.setDiaSemana(diaSemana != null ? diaSemana : mapearDiaSemana(LocalDate.now().getDayOfWeek()));
         alimentacao.setQuantidade(request.getQuantidade());
         alimentacao.setDataChegada(request.getDataChegada() != null ? request.getDataChegada() : LocalDate.now());
-        alimentacao.setAnimal(animal);
+        alimentacao.setHabitat(habitat);
 
         return alimentacaoRepository.save(alimentacao);
     }
 
-    public List<Alimentacao> listarAlimentacoesPorAnimal(Long animalId) {
-        return alimentacaoRepository.findByAnimalId(animalId);
+    public List<Alimentacao> listarAlimentacoesPorHabitat(Long habitatId) {
+        return alimentacaoRepository.findByHabitatId(habitatId);
     }
 
-    public List<Alimentacao> listarAlimentacoesAbertasPorAnimal(Long animalId) {
-        return alimentacaoRepository.findByAnimalIdAndDataTerminoIsNull(animalId);
+    public List<Alimentacao> listarAlimentacoesAbertasPorHabitat(Long habitatId) {
+        return alimentacaoRepository.findByHabitatIdAndDataTerminoIsNull(habitatId);
     }
 
     public Optional<Alimentacao> obterAlimentacao(Long id) {

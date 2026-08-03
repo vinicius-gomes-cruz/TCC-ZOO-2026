@@ -25,15 +25,15 @@ public class AlimentacaoController {
     }
 
     /**
-     * Criar uma nova alimentação para um animal
-     * POST /api/estoque/animal/{animalId}/alimentacao
+     * Criar uma nova alimentação para um habitat
+     * POST /api/estoque/habitat/{habitatId}/alimentacao
      */
-    @PostMapping("/animal/{animalId}/alimentacao")
+    @PostMapping("/habitat/{habitatId}/alimentacao")
     public ResponseEntity<Alimentacao> criarAlimentacao(
-            @PathVariable Long animalId,
+            @PathVariable Long habitatId,
             @RequestBody AlimentacaoRequest request) {
         try {
-            Alimentacao alimentacao = alimentacaoService.criarAlimentacao(animalId, request);
+            Alimentacao alimentacao = alimentacaoService.criarAlimentacaoPorHabitat(habitatId, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(alimentacao);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -41,22 +41,22 @@ public class AlimentacaoController {
     }
 
     /**
-     * Listar todas as alimentações de um animal
-     * GET /api/estoque/animal/{animalId}/alimentacoes
+     * Listar todas as alimentações de um habitat
+     * GET /api/estoque/habitat/{habitatId}/alimentacoes
      */
-    @GetMapping("/animal/{animalId}/alimentacoes")
-    public ResponseEntity<List<Alimentacao>> listarAlimentacoesPorAnimal(@PathVariable Long animalId) {
-        List<Alimentacao> alimentacoes = alimentacaoService.listarAlimentacoesPorAnimal(animalId);
+    @GetMapping("/habitat/{habitatId}/alimentacoes")
+    public ResponseEntity<List<Alimentacao>> listarAlimentacoesPorHabitat(@PathVariable Long habitatId) {
+        List<Alimentacao> alimentacoes = alimentacaoService.listarAlimentacoesPorHabitat(habitatId);
         return ResponseEntity.ok(alimentacoes);
     }
 
     /**
-     * Listar alimentações abertas (ainda em uso) de um animal
-     * GET /api/estoque/animal/{animalId}/alimentacoes/abertas
+     * Listar alimentações abertas (ainda em uso) de um habitat
+     * GET /api/estoque/habitat/{habitatId}/alimentacoes/abertas
      */
-    @GetMapping("/animal/{animalId}/alimentacoes/abertas")
-    public ResponseEntity<List<Alimentacao>> listarAlimentacoesAbertas(@PathVariable Long animalId) {
-        List<Alimentacao> alimentacoes = alimentacaoService.listarAlimentacoesAbertasPorAnimal(animalId);
+    @GetMapping("/habitat/{habitatId}/alimentacoes/abertas")
+    public ResponseEntity<List<Alimentacao>> listarAlimentacoesAbertas(@PathVariable Long habitatId) {
+        List<Alimentacao> alimentacoes = alimentacaoService.listarAlimentacoesAbertasPorHabitat(habitatId);
         return ResponseEntity.ok(alimentacoes);
     }
 

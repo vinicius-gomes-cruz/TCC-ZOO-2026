@@ -2,8 +2,7 @@ package com.zoo.demo.estoque;
 
 import java.time.LocalDate;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.zoo.demo.animal.Animal;
+import com.zoo.demo.habitat.Habitat;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -31,9 +30,8 @@ public class Alimentacao {
     private LocalDate dataTermino;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "animal_id")
-    @JsonBackReference
-    private Animal animal;
+    @JoinColumn(name = "habitat_id")
+    private Habitat habitat;
 
     public Alimentacao() {}
 
@@ -117,11 +115,11 @@ public class Alimentacao {
         this.dataTermino = dataTermino;
     }
 
-    public Animal getAnimal() {
-        return animal;
+    public Habitat getHabitat() {
+        return habitat;
     }
 
-    public void setAnimal(Animal animal) {
-        this.animal = animal;
+    public void setHabitat(Habitat habitat) {
+        this.habitat = habitat;
     }
 }
