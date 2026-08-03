@@ -13,6 +13,11 @@
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/AlimentacaoRepository.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/AlimentacaoRequest.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/AlimentacaoService.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/EstoqueItem.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/EstoqueItemController.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/EstoqueItemRepository.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/EstoqueItemRequest.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/EstoqueItemService.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/habitat/EnriquecimentoAmbiental.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/habitat/Habitat.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/habitat/HabitatController.java

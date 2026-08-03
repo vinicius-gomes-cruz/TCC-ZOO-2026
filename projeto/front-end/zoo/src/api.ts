@@ -195,6 +195,34 @@ export async function deleteAnimal(id: number) {
   if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
 }
 
+/* ── Estoque geral (Alimentos/Materiais) ───────────────────── */
+
+export async function listarItensEstoque(tipo?: 'ALIMENTO' | 'MATERIAL') {
+  const query = tipo ? `?tipo=${tipo}` : ''
+  const res = await fetch(`${API_BASE}/api/estoque/itens${query}`, {
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function criarItemEstoque(payload: any) {
+  const res = await fetch(`${API_BASE}/api/estoque/itens`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function deletarItemEstoque(id: number) {
+  const res = await fetch(`${API_BASE}/api/estoque/itens/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`)
+}
+
 /* ── Estoque de Alimentação ──────────────────────────────────── */
 
 export async function criarAlimentacaoPorHabitat(habitatId: number, payload: any) {

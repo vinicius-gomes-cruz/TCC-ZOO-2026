@@ -3,10 +3,11 @@ import './App.css'
 import HabitatPage, { type Habitat } from './pages/HabitatPage'
 import HabitatAnimalsPage from './pages/HabitatAnimalsPage'
 import BioterioPage from './pages/BioterioPage'
+import EstoquePage from './pages/EstoquePage'
 import LoginPage from './pages/LoginPage'
 import { logout, obterUsuarioAutenticado, type UsuarioAutenticadoResponse } from './api'
 
-type Page = 'habitats' | 'habitat-animals' | 'bioterio'
+type Page = 'habitats' | 'habitat-animals' | 'bioterio' | 'estoque'
 type UsuarioLogado = { nome: string; email: string; perfil: UsuarioAutenticadoResponse['perfil'] }
 
 function isUsuarioAutenticadoResponse(value: unknown): value is UsuarioAutenticadoResponse {
@@ -121,6 +122,13 @@ function App() {
             <span className="nav-icon">🧬</span>
             Bioterio
           </button>
+          <button
+            className={`nav-item ${currentPage === 'estoque' ? 'active' : ''}`}
+            onClick={() => setCurrentPage('estoque')}
+          >
+            <span className="nav-icon">📦</span>
+            Estoque
+          </button>
         </nav>
 
         <div className="sidebar-footer">
@@ -158,6 +166,7 @@ function App() {
             <HabitatAnimalsPage habitat={selectedHabitat} onBack={backToHabitats} />
           )}
           {currentPage === 'bioterio' && <BioterioPage />}
+          {currentPage === 'estoque' && <EstoquePage />}
         </main>
       </div>
     </div>
