@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { createCaixa, deleteCaixa, getCaixas, updateCaixa, type CaixaRequestPayload } from '../api'
+import BioterioAnotacoesPage from './BioterioAnotacoesPage'
 
 type Caixa = {
   id: number
   numeroCaixa: number
   grupoFemeas: string | null
-  idadeFemeas: string | null
   crias: string | null
   machosRotativos: string | null
   observacoes: string | null
@@ -18,6 +18,7 @@ const textoOuTraco = (valor?: string | null) => {
 }
 
 export default function BioterioPage() {
+  const [telaInterna, setTelaInterna] = useState<'caixas' | 'anotacoes'>('caixas')
   const [caixas, setCaixas] = useState<Caixa[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -26,7 +27,6 @@ export default function BioterioPage() {
   const [editingCaixa, setEditingCaixa] = useState<Caixa | null>(null)
   const [form, setForm] = useState({
     grupoFemeas: '',
-    idadeFemeas: '',
     crias: '',
     machosRotativos: '',
     observacoes: '',
@@ -78,7 +78,6 @@ export default function BioterioPage() {
     setEditingCaixa(caixa)
     setForm({
       grupoFemeas: caixa.grupoFemeas ?? '',
-      idadeFemeas: caixa.idadeFemeas ?? '',
       crias: caixa.crias ?? '',
       machosRotativos: caixa.machosRotativos ?? '',
       observacoes: caixa.observacoes ?? '',
@@ -99,7 +98,6 @@ export default function BioterioPage() {
     const payload: CaixaRequestPayload = {
       numeroCaixa: editingCaixa.numeroCaixa ?? null,
       grupoFemeas: form.grupoFemeas.trim() || null,
-      idadeFemeas: form.idadeFemeas.trim() || null,
       crias: form.crias.trim() || null,
       machosRotativos: form.machosRotativos.trim() || null,
       observacoes: form.observacoes.trim() || null,
@@ -118,6 +116,10 @@ export default function BioterioPage() {
     }
   }
 
+  if (telaInterna === 'anotacoes') {
+    return <BioterioAnotacoesPage onVoltar={() => setTelaInterna('caixas')} />
+  }
+
   return (
     <div className="page">
       <div className="page-header">
@@ -125,9 +127,14 @@ export default function BioterioPage() {
           <h1 className="page-title">Bioterio</h1>
           <p className="page-subtitle">Gerencie as caixas do biotério</p>
         </div>
-        <button className="btn-primary" onClick={handleCreate} disabled={saving}>
-          {saving ? 'Criando...' : '+ Novo Item'}
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button className="btn-secondary" onClick={() => setTelaInterna('anotacoes')}>
+            Ver anotações
+          </button>
+          <button className="btn-primary" onClick={handleCreate} disabled={saving}>
+            {saving ? 'Criando...' : '+ Novo Item'}
+          </button>
+        </div>
       </div>
 
       {error && <div className="alert-error">{error}</div>}
@@ -145,9 +152,8 @@ export default function BioterioPage() {
             <tr>
               <th>Caixa (ID)</th>
               <th>Grupo de Fêmeas</th>
-              <th>Idade das Fêmeas</th>
+              <th>Grupo de Machos</th>
               <th>Crias</th>
-              <th>Machos Rotativos</th>
               <th>Observações</th>
               <th>Ações</th>
             </tr>
@@ -157,9 +163,8 @@ export default function BioterioPage() {
               <tr key={caixa.id}>
                 <td>#{caixa.id}</td>
                 <td>{textoOuTraco(caixa.grupoFemeas)}</td>
-                <td>{textoOuTraco(caixa.idadeFemeas)}</td>
-                <td>{textoOuTraco(caixa.crias)}</td>
                 <td>{textoOuTraco(caixa.machosRotativos)}</td>
+                <td>{textoOuTraco(caixa.crias)}</td>
                 <td>{textoOuTraco(caixa.observacoes)}</td>
                 <td>
                   <div style={{ display: 'flex', gap: 8 }}>
@@ -197,14 +202,6 @@ export default function BioterioPage() {
               </label>
 
               <label>
-                Idade das Fêmeas
-                <input
-                  value={form.idadeFemeas}
-                  onChange={(e) => setForm((prev) => ({ ...prev, idadeFemeas: e.target.value }))}
-                />
-              </label>
-
-              <label>
                 Crias
                 <textarea
                   rows={3}
@@ -214,7 +211,7 @@ export default function BioterioPage() {
               </label>
 
               <label>
-                Machos Rotativos
+                Grupo de Machos
                 <input
                   value={form.machosRotativos}
                   onChange={(e) => setForm((prev) => ({ ...prev, machosRotativos: e.target.value }))}

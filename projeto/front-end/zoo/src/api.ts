@@ -122,6 +122,11 @@ export type CaixaRequestPayload = {
   observacoes?: string | null
 }
 
+export type BioterioAnotacaoRequestPayload = {
+  dataAnotacao?: string | null
+  texto: string
+}
+
 export async function getCaixas() {
   const res = await fetch(`${API_BASE}/api/caixas`, {
     credentials: 'include',
@@ -151,6 +156,45 @@ export async function updateCaixa(id: number, payload: CaixaRequestPayload) {
 
 export async function deleteCaixa(id: number) {
   const res = await fetch(`${API_BASE}/api/caixas/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status} - ${res.statusText}`)
+  }
+}
+
+export async function getBioterioAnotacoes(data?: string) {
+  const query = data ? `?data=${encodeURIComponent(data)}` : ''
+  const res = await fetch(`${API_BASE}/api/bioterio/anotacoes${query}`, {
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function createBioterioAnotacao(payload: BioterioAnotacaoRequestPayload) {
+  const res = await fetch(`${API_BASE}/api/bioterio/anotacoes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function updateBioterioAnotacao(id: number, payload: BioterioAnotacaoRequestPayload) {
+  const res = await fetch(`${API_BASE}/api/bioterio/anotacoes/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function deleteBioterioAnotacao(id: number) {
+  const res = await fetch(`${API_BASE}/api/bioterio/anotacoes/${id}`, {
     method: 'DELETE',
     credentials: 'include',
   })
