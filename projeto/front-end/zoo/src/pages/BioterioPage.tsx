@@ -309,6 +309,7 @@ export default function BioterioPage() {
           <p>Nenhum item do bioterio cadastrado. Clique em "Novo Item" para começar.</p>
         </div>
       ) : (
+        <div className="table-container">
         <table className="table">
           <thead>
             <tr>
@@ -344,6 +345,7 @@ export default function BioterioPage() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
 
       {showModal && editingCaixa && (
