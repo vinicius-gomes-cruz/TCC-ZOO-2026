@@ -8,5 +8,9 @@ public interface EstoqueItemRepository extends JpaRepository<EstoqueItem, Long> 
 
     List<EstoqueItem> findByTipoOrderByDataEntradaDescIdDesc(String tipo);
 
+    List<EstoqueItem> findByTipoOrderByDataEntradaAscIdAsc(String tipo);
+
     List<EstoqueItem> findAllByOrderByDataEntradaDescIdDesc();
+
+    List<EstoqueItem> findByTipoAndNoBioterioOrderByDataEntradaDescIdDesc(String tipo, boolean noBioterio);
 }

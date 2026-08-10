@@ -43,6 +43,8 @@ public class CaixaController {
         caixa.setIdadeFemeas(request.getIdadeFemeas());
         caixa.setCrias(request.getCrias());
         caixa.setMachosRotativos(request.getMachosRotativos());
+        caixa.setDataNascimento(request.getDataNascimento());
+        caixa.setDataDesmame(request.getDataDesmame());
 
         Caixa saved = repository.save(caixa);
         return ResponseEntity.created(URI.create("/api/caixas/" + saved.getId())).body(saved);
@@ -57,6 +59,8 @@ public class CaixaController {
                     existing.setIdadeFemeas(request.getIdadeFemeas());
                     existing.setCrias(request.getCrias());
                     existing.setMachosRotativos(request.getMachosRotativos());
+                    existing.setDataNascimento(request.getDataNascimento());
+                    existing.setDataDesmame(request.getDataDesmame());
                     Caixa updated = repository.save(existing);
                     return ResponseEntity.ok(updated);
                 })

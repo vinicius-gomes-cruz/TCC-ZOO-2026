@@ -119,11 +119,24 @@ export type CaixaRequestPayload = {
   idadeFemeas?: string | null
   crias?: string | null
   machosRotativos?: string | null
+  dataNascimento?: string | null
+  dataDesmame?: string | null
 }
 
 export type BioterioAnotacaoRequestPayload = {
   dataAnotacao?: string | null
   texto: string
+}
+
+export type ItemEstoqueRacao = {
+  id: number
+  nome: string
+  quantidade: number
+  unidade: string
+  dataEntrada: string
+  noBioterio: boolean
+  quantidadePacotes: number | null
+  pesoPorPacote: number | null
 }
 
 export async function getCaixas() {
@@ -240,7 +253,7 @@ export async function deleteAnimal(id: number) {
 
 /* ── Estoque geral (Alimentos/Materiais) ───────────────────── */
 
-export async function listarItensEstoque(tipo?: 'ALIMENTO' | 'MATERIAL') {
+export async function listarItensEstoque(tipo?: 'ALIMENTO' | 'MATERIAL' | 'RACAO') {
   const query = tipo ? `?tipo=${tipo}` : ''
   const res = await fetch(`${API_BASE}/api/estoque/itens${query}`, {
     credentials: 'include',
@@ -261,6 +274,48 @@ export async function criarItemEstoque(payload: any) {
 export async function deletarItemEstoque(id: number) {
   const res = await fetch(`${API_BASE}/api/estoque/itens/${id}`, {
     method: 'DELETE',
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`)
+}
+
+export async function adicionarPacotesEstoque(id: number, pacotes: number) {
+  const res = await fetch(`${API_BASE}/api/estoque/itens/${id}/adicionar-pacotes`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pacotes }),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function listarRacoesDisponiveis(): Promise<ItemEstoqueRacao[]> {
+  const res = await fetch(`${API_BASE}/api/estoque/racao/disponiveis`, {
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function listarRacoesNoBioterio(): Promise<ItemEstoqueRacao[]> {
+  const res = await fetch(`${API_BASE}/api/estoque/racao/no-bioterio`, {
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function enviarRacaoParaBioterio(id: number, pacotes: number): Promise<ItemEstoqueRacao> {
+  const res = await fetch(`${API_BASE}/api/estoque/itens/${id}/enviar-bioterio`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pacotes }),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function finalizarRacaoNoBioterio(id: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/estoque/itens/${id}/finalizar-bioterio`, {
+    method: 'PATCH',
     credentials: 'include',
   })
   if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`)

@@ -4,6 +4,10 @@
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/animal/AnimalController.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/animal/AnimalRepository.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/animal/AnimalRequest.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/bioterio/BioterioAnotacao.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/bioterio/BioterioAnotacaoController.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/bioterio/BioterioAnotacaoRepository.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/bioterio/BioterioAnotacaoRequest.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/caixa/Caixa.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/caixa/CaixaController.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/caixa/CaixaRepository.java
@@ -13,11 +17,15 @@
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/AlimentacaoRepository.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/AlimentacaoRequest.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/AlimentacaoService.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/BioterioEstoque.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/BioterioEstoqueRepository.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/EstoqueItem.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/EstoqueItemController.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/EstoqueItemRepository.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/EstoqueItemRequest.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/EstoqueItemService.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/RacaoSaldoResponse.java
+/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/estoque/TransferirRacaoRequest.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/habitat/EnriquecimentoAmbiental.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/habitat/Habitat.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/habitat/HabitatController.java

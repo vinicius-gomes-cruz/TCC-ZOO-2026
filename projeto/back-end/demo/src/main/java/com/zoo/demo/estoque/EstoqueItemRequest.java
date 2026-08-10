@@ -10,7 +10,8 @@ public class EstoqueItemRequest {
     private BigDecimal quantidade;
     private String unidade;
     private LocalDate dataEntrada;
-    private String observacao;
+    private Integer quantidadePacotes;
+    private BigDecimal pesoPorPacote;
 
     public String getTipo() {
         return tipo;
@@ -52,11 +53,19 @@ public class EstoqueItemRequest {
         this.dataEntrada = dataEntrada;
     }
 
-    public String getObservacao() {
-        return observacao;
+    public Integer getQuantidadePacotes() {
+        return quantidadePacotes;
     }
 
-    public void setObservacao(String observacao) {
-        this.observacao = observacao;
+    public void setQuantidadePacotes(Integer quantidadePacotes) {
+        this.quantidadePacotes = quantidadePacotes;
+    }
+
+    public BigDecimal getPesoPorPacote() {
+        return pesoPorPacote;
+    }
+
+    public void setPesoPorPacote(BigDecimal pesoPorPacote) {
+        this.pesoPorPacote = pesoPorPacote;
     }
 }

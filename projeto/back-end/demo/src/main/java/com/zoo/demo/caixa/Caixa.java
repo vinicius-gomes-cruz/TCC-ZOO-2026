@@ -29,6 +29,10 @@ public class Caixa {
 
     private String machosRotativos;
 
+    private String dataNascimento;
+
+    private String dataDesmame;
+
     public Caixa() {
     }
 }

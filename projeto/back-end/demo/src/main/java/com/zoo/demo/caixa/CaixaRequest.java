@@ -12,4 +12,6 @@ public class CaixaRequest {
     private String idadeFemeas;
     private String crias;
     private String machosRotativos;
+    private String dataNascimento;
+    private String dataDesmame;
 }

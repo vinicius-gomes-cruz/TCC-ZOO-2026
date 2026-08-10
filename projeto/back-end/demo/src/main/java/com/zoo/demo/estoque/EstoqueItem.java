@@ -29,8 +29,12 @@ public class EstoqueItem {
 
     private LocalDate dataEntrada;
 
-    @Column(columnDefinition = "TEXT")
-    private String observacao;
+    private boolean noBioterio;
+
+    private Integer quantidadePacotes;
+
+    @Column(precision = 14, scale = 2)
+    private BigDecimal pesoPorPacote;
 
     public Long getId() {
         return id;
@@ -80,11 +84,27 @@ public class EstoqueItem {
         this.dataEntrada = dataEntrada;
     }
 
-    public String getObservacao() {
-        return observacao;
+    public boolean isNoBioterio() {
+        return noBioterio;
     }
 
-    public void setObservacao(String observacao) {
-        this.observacao = observacao;
+    public void setNoBioterio(boolean noBioterio) {
+        this.noBioterio = noBioterio;
+    }
+
+    public Integer getQuantidadePacotes() {
+        return quantidadePacotes;
+    }
+
+    public void setQuantidadePacotes(Integer quantidadePacotes) {
+        this.quantidadePacotes = quantidadePacotes;
+    }
+
+    public BigDecimal getPesoPorPacote() {
+        return pesoPorPacote;
+    }
+
+    public void setPesoPorPacote(BigDecimal pesoPorPacote) {
+        this.pesoPorPacote = pesoPorPacote;
     }
 }
