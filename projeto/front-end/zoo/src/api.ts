@@ -119,7 +119,6 @@ export type CaixaRequestPayload = {
   idadeFemeas?: string | null
   crias?: string | null
   machosRotativos?: string | null
-  observacoes?: string | null
 }
 
 export type BioterioAnotacaoRequestPayload = {

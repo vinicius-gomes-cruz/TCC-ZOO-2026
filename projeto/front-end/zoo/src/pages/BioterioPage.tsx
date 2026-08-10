@@ -9,7 +9,6 @@ type Caixa = {
   grupoFemeas: string | null
   crias: string | null
   machosRotativos: string | null
-  observacoes: string | null
 }
 
 const textoOuTraco = (valor?: string | null) => {
@@ -29,7 +28,6 @@ export default function BioterioPage() {
     grupoFemeas: '',
     crias: '',
     machosRotativos: '',
-    observacoes: '',
   })
 
   const load = () => {
@@ -80,7 +78,6 @@ export default function BioterioPage() {
       grupoFemeas: caixa.grupoFemeas ?? '',
       crias: caixa.crias ?? '',
       machosRotativos: caixa.machosRotativos ?? '',
-      observacoes: caixa.observacoes ?? '',
     })
     setShowModal(true)
   }
@@ -100,7 +97,6 @@ export default function BioterioPage() {
       grupoFemeas: form.grupoFemeas.trim() || null,
       crias: form.crias.trim() || null,
       machosRotativos: form.machosRotativos.trim() || null,
-      observacoes: form.observacoes.trim() || null,
     }
 
     try {
@@ -154,7 +150,6 @@ export default function BioterioPage() {
               <th>Grupo de Fêmeas</th>
               <th>Grupo de Machos</th>
               <th>Crias</th>
-              <th>Observações</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -165,7 +160,6 @@ export default function BioterioPage() {
                 <td>{textoOuTraco(caixa.grupoFemeas)}</td>
                 <td>{textoOuTraco(caixa.machosRotativos)}</td>
                 <td>{textoOuTraco(caixa.crias)}</td>
-                <td>{textoOuTraco(caixa.observacoes)}</td>
                 <td>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button className="btn-secondary" onClick={() => openEdit(caixa)} disabled={saving}>
@@ -215,15 +209,6 @@ export default function BioterioPage() {
                 <input
                   value={form.machosRotativos}
                   onChange={(e) => setForm((prev) => ({ ...prev, machosRotativos: e.target.value }))}
-                />
-              </label>
-
-              <label>
-                Observações
-                <textarea
-                  rows={3}
-                  value={form.observacoes}
-                  onChange={(e) => setForm((prev) => ({ ...prev, observacoes: e.target.value }))}
                 />
               </label>
 

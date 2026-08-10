@@ -29,9 +29,6 @@ public class Caixa {
 
     private String machosRotativos;
 
-    @Column(columnDefinition = "TEXT")
-    private String observacoes;
-
     public Caixa() {
     }
 }

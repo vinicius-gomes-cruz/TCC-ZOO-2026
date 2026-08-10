@@ -1,10 +1,17 @@
 package com.zoo.demo.caixa;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.net.URI;
 import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/caixas")
@@ -36,7 +43,6 @@ public class CaixaController {
         caixa.setIdadeFemeas(request.getIdadeFemeas());
         caixa.setCrias(request.getCrias());
         caixa.setMachosRotativos(request.getMachosRotativos());
-        caixa.setObservacoes(request.getObservacoes());
 
         Caixa saved = repository.save(caixa);
         return ResponseEntity.created(URI.create("/api/caixas/" + saved.getId())).body(saved);
@@ -51,7 +57,6 @@ public class CaixaController {
                     existing.setIdadeFemeas(request.getIdadeFemeas());
                     existing.setCrias(request.getCrias());
                     existing.setMachosRotativos(request.getMachosRotativos());
-                    existing.setObservacoes(request.getObservacoes());
                     Caixa updated = repository.save(existing);
                     return ResponseEntity.ok(updated);
                 })
