@@ -25,6 +25,7 @@ public class UsuarioBootstrapConfig {
             admin.setEmail(emailAdmin);
             admin.setSenha(usuarioAuthService.encodeSenha("admin123"));
             admin.setPerfil(PerfilUsuario.ADMINISTRADOR);
+            admin.setAtivo(true);
 
             usuarioRepository.save(admin);
             LOGGER.warn("Administrador padrão criado: {} / senha: admin123", emailAdmin);

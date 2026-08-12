@@ -5,9 +5,10 @@ import HabitatAnimalsPage from './pages/HabitatAnimalsPage'
 import BioterioPage from './pages/BioterioPage'
 import EstoquePage from './pages/EstoquePage'
 import LoginPage from './pages/LoginPage'
+import UsuariosPage from './pages/UsuariosPage'
 import { logout, obterUsuarioAutenticado, type UsuarioAutenticadoResponse } from './api'
 
-type Page = 'habitats' | 'habitat-animals' | 'bioterio' | 'estoque'
+type Page = 'habitats' | 'habitat-animals' | 'bioterio' | 'estoque' | 'usuarios'
 type UsuarioLogado = { nome: string; email: string; perfil: UsuarioAutenticadoResponse['perfil'] }
 
 function isUsuarioAutenticadoResponse(value: unknown): value is UsuarioAutenticadoResponse {
@@ -87,6 +88,8 @@ function App() {
     return <LoginPage onLogin={handleLogin} />
   }
 
+  const isAdmin = usuarioLogado.perfil === 'ADMINISTRADOR'
+
   const openHabitatAnimals = (habitat: Habitat) => {
     setSelectedHabitat(habitat)
     setCurrentPage('habitat-animals')
@@ -129,6 +132,15 @@ function App() {
             <span className="nav-icon">📦</span>
             Estoque
           </button>
+          {isAdmin && (
+            <button
+              className={`nav-item ${currentPage === 'usuarios' ? 'active' : ''}`}
+              onClick={() => setCurrentPage('usuarios')}
+            >
+              <span className="nav-icon">👤</span>
+              Usuários
+            </button>
+          )}
         </nav>
 
         <div className="sidebar-footer">
@@ -167,6 +179,7 @@ function App() {
           )}
           {currentPage === 'bioterio' && <BioterioPage />}
           {currentPage === 'estoque' && <EstoquePage />}
+          {currentPage === 'usuarios' && isAdmin && <UsuariosPage />}
         </main>
       </div>
     </div>

@@ -11,13 +11,15 @@ public class UsuarioResponse {
     private String nome;
     private String email;
     private PerfilUsuario perfil;
+    private boolean ativo;
 
     public static UsuarioResponse from(Usuario usuario) {
         return new UsuarioResponse(
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail(),
-                usuario.getPerfil()
+                usuario.getPerfil(),
+                usuario.isAtivo()
         );
     }
 }

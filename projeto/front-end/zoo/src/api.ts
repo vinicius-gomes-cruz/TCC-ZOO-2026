@@ -18,6 +18,22 @@ export type UsuarioAutenticadoResponse = {
   perfil: PerfilUsuario
 }
 
+export type UsuarioSistemaResponse = {
+  id: number
+  nome: string
+  email: string
+  perfil: PerfilUsuario
+  ativo: boolean
+}
+
+export type UsuarioSistemaRequest = {
+  nome: string
+  email: string
+  senha?: string
+  perfil: PerfilUsuario
+  ativo: boolean
+}
+
 async function handleResponse(res: Response) {
   if (!res.ok) {
     const text = await res.text().catch(() => '')
@@ -72,6 +88,43 @@ export async function logout(): Promise<void> {
   if (!res.ok && res.status !== 401) {
     throw new Error(`HTTP ${res.status} - ${res.statusText}`)
   }
+}
+
+/* ── Usuários (somente admin) ─────────────────────────────── */
+
+export async function listarUsuarios(): Promise<UsuarioSistemaResponse[]> {
+  const res = await fetch(`${API_BASE}/api/usuarios`, {
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function criarUsuario(payload: UsuarioSistemaRequest): Promise<UsuarioSistemaResponse> {
+  const res = await fetch(`${API_BASE}/api/usuarios`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function atualizarUsuario(id: number, payload: UsuarioSistemaRequest): Promise<UsuarioSistemaResponse> {
+  const res = await fetch(`${API_BASE}/api/usuarios/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function excluirUsuario(id: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/usuarios/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`)
 }
 
 /* ── Habitats ────────────────────────────────────────────── */

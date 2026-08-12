@@ -226,32 +226,34 @@ export default function BioterioAnotacoesPage({ onVoltar }: BioterioAnotacoesPag
 
       <h2 className="section-title" style={{ marginTop: 20 }}>Histórico de anotações</h2>
 
-      <form className="anotacoes-filter-bare">
-        <label className="anotacoes-filter-label-compact">
-          Data inicial
+      <form className="anotacoes-filter">
+        <div className="anotacoes-filter-field">
+          <label htmlFor="filtro-inicio">Data inicial</label>
           <input
+            id="filtro-inicio"
             type="date"
             value={filtroInicio}
             onChange={(e) => setFiltroInicio(e.target.value)}
           />
-        </label>
+        </div>
 
-        <label className="anotacoes-filter-label-compact">
-          Data final
+        <div className="anotacoes-filter-field">
+          <label htmlFor="filtro-fim">Data final</label>
           <input
+            id="filtro-fim"
             type="date"
             value={filtroFim}
             onChange={(e) => setFiltroFim(e.target.value)}
           />
-        </label>
+        </div>
 
         <button
           type="button"
-          className="btn-secondary anotacoes-filter-btn"
+          className="anotacoes-filter-btn"
           onClick={limparFiltro}
           disabled={loading}
         >
-          Limpar
+          Limpar filtros
         </button>
       </form>
 

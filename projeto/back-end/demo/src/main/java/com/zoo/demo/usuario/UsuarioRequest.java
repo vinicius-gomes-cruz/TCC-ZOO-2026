@@ -11,4 +11,5 @@ public class UsuarioRequest {
     private String email;
     private String senha;
     private PerfilUsuario perfil;
+    private Boolean ativo;
 }

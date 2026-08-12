@@ -37,6 +37,10 @@ public class UsuarioAuthService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciais inválidas"));
 
+        if (!usuario.isAtivo()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuário inativo");
+        }
+
         String senhaSalva = usuario.getSenha() == null ? "" : usuario.getSenha();
         boolean senhaValida = passwordEncoder.matches(senha, senhaSalva);
 
@@ -117,6 +121,7 @@ public class UsuarioAuthService {
         usuario.setEmail(email);
         usuario.setSenha(passwordEncoder.encode(senha));
         usuario.setPerfil(perfil);
+        usuario.setAtivo(request.getAtivo() == null || request.getAtivo());
 
         return usuarioRepository.save(usuario);
     }
@@ -140,6 +145,9 @@ public class UsuarioAuthService {
         existente.setNome(nome);
         existente.setEmail(email);
         existente.setPerfil(perfil);
+        if (request.getAtivo() != null) {
+            existente.setAtivo(request.getAtivo());
+        }
 
         if (!senha.isBlank()) {
             existente.setSenha(passwordEncoder.encode(senha));

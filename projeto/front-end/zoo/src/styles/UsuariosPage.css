@@ -1,0 +1,48 @@
+.usuario-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.usuario-perfil-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.usuario-perfil-badge.admin {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #a5d6a7;
+}
+
+.usuario-perfil-badge.funcionario {
+  background: #e3f2fd;
+  color: #0d47a1;
+  border: 1px solid #90caf9;
+}
+
+.usuario-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.usuario-status-badge.ativo {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #a5d6a7;
+}
+
+.usuario-status-badge.inativo {
+  background: #ffebee;
+  color: #b71c1c;
+  border: 1px solid #ef9a9a;
+}
