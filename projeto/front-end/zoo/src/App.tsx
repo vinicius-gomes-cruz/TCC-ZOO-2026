@@ -9,7 +9,7 @@ import UsuariosPage from './pages/UsuariosPage'
 import { logout, obterUsuarioAutenticado, type UsuarioAutenticadoResponse } from './api'
 
 type Page = 'habitats' | 'habitat-animals' | 'bioterio' | 'estoque' | 'usuarios'
-type UsuarioLogado = { nome: string; email: string; perfil: UsuarioAutenticadoResponse['perfil'] }
+type UsuarioLogado = { nome: string; usuario: string; perfil: UsuarioAutenticadoResponse['perfil'] }
 
 function isUsuarioAutenticadoResponse(value: unknown): value is UsuarioAutenticadoResponse {
   if (!value || typeof value !== 'object') return false
@@ -17,7 +17,7 @@ function isUsuarioAutenticadoResponse(value: unknown): value is UsuarioAutentica
   const v = value as Record<string, unknown>
   return (
     typeof v.nome === 'string' &&
-    typeof v.email === 'string' &&
+    typeof v.usuario === 'string' &&
     (v.perfil === 'ADMINISTRADOR' || v.perfil === 'FUNCIONARIO')
   )
 }
@@ -39,7 +39,7 @@ function App() {
 
         setUsuarioLogado({
           nome: usuarioAtual.nome,
-          email: usuarioAtual.email,
+          usuario: usuarioAtual.usuario,
           perfil: usuarioAtual.perfil,
         })
       } catch {
@@ -56,7 +56,7 @@ function App() {
   const handleLogin = (usuario: UsuarioAutenticadoResponse) => {
     setUsuarioLogado({
       nome: usuario.nome,
-      email: usuario.email,
+      usuario: usuario.usuario,
       perfil: usuario.perfil,
     })
   }

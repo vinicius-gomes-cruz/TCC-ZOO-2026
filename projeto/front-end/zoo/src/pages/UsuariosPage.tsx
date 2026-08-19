@@ -12,7 +12,7 @@ import '../styles/UsuariosPage.css'
 
 type FormState = {
   nome: string
-  email: string
+  usuario: string
   senha: string
   perfil: PerfilUsuario
   ativo: boolean
@@ -20,7 +20,7 @@ type FormState = {
 
 const FORM_INICIAL: FormState = {
   nome: '',
-  email: '',
+  usuario: '',
   senha: '',
   perfil: 'FUNCIONARIO',
   ativo: true,
@@ -77,7 +77,7 @@ export default function UsuariosPage() {
     setEditingUsuario(usuario)
     setForm({
       nome: usuario.nome,
-      email: usuario.email,
+      usuario: usuario.usuario,
       senha: '',
       perfil: usuario.perfil,
       ativo: usuario.ativo,
@@ -93,11 +93,11 @@ export default function UsuariosPage() {
 
   const montarPayload = (): UsuarioSistemaRequest | null => {
     const nome = form.nome.trim()
-    const email = form.email.trim().toLowerCase()
+    const usuario = form.usuario.trim().toLowerCase()
     const senha = form.senha.trim()
 
-    if (!nome || !email) {
-      setError('Nome e e-mail são obrigatórios.')
+    if (!nome || !usuario) {
+      setError('Nome e usuário são obrigatórios.')
       return null
     }
 
@@ -108,8 +108,8 @@ export default function UsuariosPage() {
 
     if (editingUsuario) {
       return {
-        nome,
-        email,
+      nome,
+      usuario,
         perfil: form.perfil,
         ativo: form.ativo,
         ...(senha ? { senha } : {}),
@@ -118,7 +118,7 @@ export default function UsuariosPage() {
 
     return {
       nome,
-      email,
+      usuario,
       senha,
       perfil: form.perfil,
       ativo: form.ativo,
@@ -135,14 +135,15 @@ export default function UsuariosPage() {
     try {
       setSaving(true)
       if (editingUsuario) {
-        await atualizarUsuario(editingUsuario.id, payload)
+          await atualizarUsuario(editingUsuario.id, payload)
       } else {
-        await criarUsuario(payload)
+          await criarUsuario(payload)
       }
 
       fecharModal()
       await carregarUsuarios()
     } catch (e) {
+      // keep modal open and show error inside it
       setError(extrairMensagemErro(e, 'Não foi possível salvar o usuário.'))
     } finally {
       setSaving(false)
@@ -158,7 +159,7 @@ export default function UsuariosPage() {
       setError(null)
       await atualizarUsuario(usuario.id, {
         nome: usuario.nome,
-        email: usuario.email,
+        usuario: usuario.usuario,
         perfil: usuario.perfil,
         ativo: !usuario.ativo,
       })
@@ -199,7 +200,7 @@ export default function UsuariosPage() {
             <thead>
               <tr>
                 <th>Nome</th>
-                <th>E-mail</th>
+                <th>Usuário</th>
                 <th>Perfil</th>
                 <th>Status</th>
                 <th>Ações</th>
@@ -209,7 +210,7 @@ export default function UsuariosPage() {
               {usuarios.map((usuario) => (
                 <tr key={usuario.id}>
                   <td className="font-weight-bold">{usuario.nome}</td>
-                  <td>{usuario.email}</td>
+                  <td>{usuario.usuario}</td>
                   <td>
                     <span className={`usuario-perfil-badge ${usuario.perfil === 'ADMINISTRADOR' ? 'admin' : 'funcionario'}`}>
                       {formatarPerfil(usuario.perfil)}
@@ -247,6 +248,8 @@ export default function UsuariosPage() {
               </button>
             </div>
 
+            {error && <div className="alert-error">{error}</div>}
+
             <form className="modal-form" onSubmit={salvarUsuario}>
               <label>
                 Nome
@@ -259,11 +262,11 @@ export default function UsuariosPage() {
               </label>
 
               <label>
-                E-mail
+                Usuário
                 <input
-                  type="email"
-                  value={form.email}
-                  onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+                  type="text"
+                  value={form.usuario}
+                  onChange={(event) => setForm((prev) => ({ ...prev, usuario: event.target.value }))}
                   required
                 />
               </label>

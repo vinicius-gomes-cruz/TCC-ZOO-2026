@@ -78,6 +78,7 @@ export default function BioterioPage() {
       await createCaixa({})
       load()
     } catch (e) {
+      setShowModal(false)
       setError(String(e))
     } finally {
       setSaving(false)
@@ -256,6 +257,8 @@ export default function BioterioPage() {
                   ✕
                 </button>
               </div>
+
+              {error && <div className="alert-error">{error}</div>}
 
               <form className="modal-form" onSubmit={handleEnviarParaBioterio}>
                 <label>

@@ -25,16 +25,25 @@ public class AlimentacaoService {
     public Alimentacao criarAlimentacaoPorHabitat(Long habitatId, AlimentacaoRequest request) {
         Habitat habitat = habitatRepository.findById(habitatId)
                 .orElseThrow(() -> new IllegalArgumentException("Habitat não encontrado com id: " + habitatId));
+        String cardapioName = request.getCardapio() != null && !request.getCardapio().isBlank()
+            ? request.getCardapio().trim()
+            : "Cardápio Semanal";
+        String diaSemana = request.getDiaSemana() != null && !request.getDiaSemana().isBlank()
+            ? request.getDiaSemana().trim().toUpperCase()
+            : null;
+
+        // Prevent adding more than one active alimentação for same habitat / cardápio / diaSemana
+        if (diaSemana != null) {
+            boolean exists = alimentacaoRepository.existsByHabitatIdAndCardapioAndDiaSemanaAndDataTerminoIsNull(habitatId, cardapioName, diaSemana);
+            if (exists) {
+                throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "Já existe uma alimentação para este dia no cardápio selecionado");
+            }
+        }
 
         Alimentacao alimentacao = new Alimentacao();
         alimentacao.setNome(request.getNome());
         alimentacao.setTipo(request.getTipo());
-        alimentacao.setCardapio(request.getCardapio() != null && !request.getCardapio().isBlank()
-            ? request.getCardapio().trim()
-            : "Cardápio Semanal");
-        String diaSemana = request.getDiaSemana() != null && !request.getDiaSemana().isBlank()
-            ? request.getDiaSemana().trim().toUpperCase()
-            : null;
+        alimentacao.setCardapio(cardapioName);
         alimentacao.setDiaSemana(diaSemana != null ? diaSemana : mapearDiaSemana(LocalDate.now().getDayOfWeek()));
         alimentacao.setQuantidade(request.getQuantidade());
         alimentacao.setDataChegada(request.getDataChegada() != null ? request.getDataChegada() : LocalDate.now());
@@ -73,6 +82,39 @@ public class AlimentacaoService {
 
     public void deletarAlimentacao(Long id) {
         alimentacaoRepository.deleteById(id);
+    }
+
+    public Alimentacao atualizarAlimentacao(Long id, AlimentacaoRequest request) {
+        Alimentacao alimentacao = alimentacaoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Alimentação não encontrada com id: " + id));
+
+        if (request.getNome() != null) {
+            alimentacao.setNome(request.getNome());
+        }
+        if (request.getTipo() != null) {
+            alimentacao.setTipo(request.getTipo());
+        }
+        String newCardapio = request.getCardapio() != null ? (request.getCardapio().trim().isEmpty() ? "Cardápio Semanal" : request.getCardapio().trim()) : alimentacao.getCardapio();
+        String newDiaSemana = request.getDiaSemana() != null ? request.getDiaSemana().trim().toUpperCase() : alimentacao.getDiaSemana();
+
+        // If changing cardapio/diaSemana, ensure no other active alimentação exists for same habitat/cardapio/diaSemana
+        if (newDiaSemana != null) {
+            boolean conflict = alimentacaoRepository.existsByHabitatIdAndCardapioAndDiaSemanaAndDataTerminoIsNullAndIdNot(
+                    alimentacao.getHabitat().getId(), newCardapio, newDiaSemana, alimentacao.getId());
+            if (conflict) {
+                throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "Já existe uma alimentação para este dia no cardápio selecionado");
+            }
+        }
+
+        alimentacao.setCardapio(newCardapio);
+        if (newDiaSemana != null) {
+            alimentacao.setDiaSemana(newDiaSemana);
+        }
+        if (request.getQuantidade() != null) {
+            alimentacao.setQuantidade(request.getQuantidade());
+        }
+
+        return alimentacaoRepository.save(alimentacao);
     }
 
     private String mapearDiaSemana(DayOfWeek dayOfWeek) {

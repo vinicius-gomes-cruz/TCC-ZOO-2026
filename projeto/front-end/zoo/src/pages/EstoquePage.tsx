@@ -121,6 +121,7 @@ export default function EstoquePage() {
       setShowForm(false)
       await load()
     } catch (e) {
+      // keep form open and display error inside modal
       setError(String(e))
     } finally {
       setSaving(false)
@@ -305,6 +306,8 @@ export default function EstoquePage() {
                 ✕
               </button>
             </div>
+
+            {error && <div className="alert-error">{error}</div>}
 
             <form onSubmit={handleSubmit} className="modal-form estoque-form-grid">
               <label>

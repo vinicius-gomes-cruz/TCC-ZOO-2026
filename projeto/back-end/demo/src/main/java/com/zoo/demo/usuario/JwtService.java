@@ -45,7 +45,7 @@ public class JwtService {
         return Jwts.builder()
                 .subject(String.valueOf(usuario.getId()))
                 .claim("perfil", usuario.getPerfil().name())
-                .claim("email", usuario.getEmail())
+                .claim("usuario", usuario.getUsuario())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(exp))
                 .signWith(signingKey)

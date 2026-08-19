@@ -18,17 +18,17 @@ public class UsuarioBootstrapConfig {
                 return;
             }
 
-            String emailAdmin = "admin@zoogestor.local";
-            Usuario admin = usuarioRepository.findByEmail(emailAdmin).orElseGet(Usuario::new);
+            String usuarioAdmin = "admin";
+            Usuario admin = usuarioRepository.findByUsuario(usuarioAdmin).orElseGet(Usuario::new);
 
             admin.setNome("Administrador");
-            admin.setEmail(emailAdmin);
+            admin.setUsuario(usuarioAdmin);
             admin.setSenha(usuarioAuthService.encodeSenha("admin123"));
             admin.setPerfil(PerfilUsuario.ADMINISTRADOR);
             admin.setAtivo(true);
 
             usuarioRepository.save(admin);
-            LOGGER.warn("Administrador padrão criado: {} / senha: admin123", emailAdmin);
+            LOGGER.warn("Administrador padrão criado: {} / senha: admin123", usuarioAdmin);
         };
     }
 }

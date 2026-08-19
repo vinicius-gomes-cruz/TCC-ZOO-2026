@@ -11,6 +11,6 @@ public class UsuarioLoginResponse {
     private String refreshToken;
     private Long id;
     private String nome;
-    private String email;
+    private String usuario;
     private PerfilUsuario perfil;
 }

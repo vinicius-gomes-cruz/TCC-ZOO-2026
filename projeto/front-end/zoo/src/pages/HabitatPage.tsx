@@ -99,6 +99,7 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
       setShowModal(false)
       load()
     } catch (e) {
+      // keep habitat modal open and show error inside it
       setError(String(e))
     } finally {
       setSaving(false)
@@ -149,9 +150,11 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
   return (
     <div className="page" onClick={() => setOpenMenuId(null)}>
       <div className="page-header">
-        <div>
-          <h1 className="page-title">Habitats</h1>
-          <p className="page-subtitle">Gerencie os habitats do zoológico</p>
+            </div>
+
+            {error && <div className="alert-error">{error}</div>}
+
+            <form onSubmit={handleSubmit} className="modal-form">
         </div>
         <button className="btn-primary" onClick={openCreate}>
           + Novo Habitat

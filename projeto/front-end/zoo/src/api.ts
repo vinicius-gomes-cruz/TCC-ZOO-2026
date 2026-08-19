@@ -7,28 +7,28 @@ export type UsuarioLoginResponse = {
   refreshToken: string
   id: number
   nome: string
-  email: string
+  usuario: string
   perfil: PerfilUsuario
 }
 
 export type UsuarioAutenticadoResponse = {
   id: number
   nome: string
-  email: string
+  usuario: string
   perfil: PerfilUsuario
 }
 
 export type UsuarioSistemaResponse = {
   id: number
   nome: string
-  email: string
+  usuario: string
   perfil: PerfilUsuario
   ativo: boolean
 }
 
 export type UsuarioSistemaRequest = {
   nome: string
-  email: string
+  usuario: string
   senha?: string
   perfil: PerfilUsuario
   ativo: boolean
@@ -52,7 +52,7 @@ async function handleResponse(res: Response) {
 
 /* ── Autenticação ───────────────────────────────────────────── */
 
-export async function login(payload: { email: string; senha: string }): Promise<UsuarioLoginResponse> {
+export async function login(payload: { usuario: string; senha: string }): Promise<UsuarioLoginResponse> {
   const res = await fetch(`${API_BASE}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -430,6 +430,17 @@ export async function obterAlimentacao(id: number) {
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
   return res.json();
+}
+
+export async function updateAlimentacao(id: number, payload: any) {
+  const res = await fetch(`${API_BASE}/api/estoque/alimentacao/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`)
+  return res.json()
 }
 
 export async function registrarAberturaAlimentacao(id: number, data?: string) {

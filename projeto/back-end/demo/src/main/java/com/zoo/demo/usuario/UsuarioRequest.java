@@ -8,7 +8,7 @@ import lombok.Setter;
 public class UsuarioRequest {
 
     private String nome;
-    private String email;
+    private String usuario;
     private String senha;
     private PerfilUsuario perfil;
     private Boolean ativo;

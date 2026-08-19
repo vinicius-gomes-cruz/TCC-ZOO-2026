@@ -699,16 +699,16 @@
 }
 
 .modal-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: block;
   font-size: 13px;
   font-weight: 600;
   color: #3c4043;
 }
 
-.required {
+.modal-form label .required {
   color: #c62828;
+  margin-left: 6px;
+  font-weight: 700;
 }
 
 .modal-form input,
@@ -725,6 +725,7 @@
   box-sizing: border-box;
   font-family: inherit;
   resize: vertical;
+  margin-top: 6px;
 }
 
 .modal-form input:focus,

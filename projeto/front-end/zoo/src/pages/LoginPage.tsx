@@ -12,7 +12,7 @@ function isUsuarioAutenticadoResponse(value: unknown): value is UsuarioAutentica
   const v = value as Record<string, unknown>
   return (
     typeof v.nome === 'string' &&
-    typeof v.email === 'string' &&
+    typeof v.usuario === 'string' &&
     (v.perfil === 'ADMINISTRADOR' || v.perfil === 'FUNCIONARIO')
   )
 }
@@ -28,13 +28,13 @@ function LoginPage({ onLogin }: LoginPageProps) {
     setErro('')
 
     if (!email.trim() || !senha.trim()) {
-      setErro('Preencha e-mail e senha para continuar.')
+      setErro('Preencha usuário e senha para continuar.')
       return
     }
 
     try {
       setCarregando(true)
-      await login({ email: email.trim(), senha: senha.trim() })
+      await login({ usuario: email.trim(), senha: senha.trim() })
       // Cookies são configurados automaticamente pelo servidor
       // Agora obter os dados do usuário autenticado
       const usuario = await obterUsuarioAutenticado()
@@ -45,7 +45,7 @@ function LoginPage({ onLogin }: LoginPageProps) {
 
       onLogin(usuario)
     } catch {
-      setErro('E-mail ou senha inválidos.')
+      setErro('Usuário ou senha inválidos.')
     } finally {
       setCarregando(false)
     }
@@ -61,11 +61,11 @@ function LoginPage({ onLogin }: LoginPageProps) {
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
-          <label htmlFor="email">E-mail</label>
+          <label htmlFor="usuario">Usuário</label>
           <input
-            id="email"
-            type="email"
-            placeholder="seuemail@zoo.com"
+            id="usuario"
+            type="text"
+            placeholder="seu.usuario"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />

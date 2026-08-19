@@ -23,8 +23,8 @@ public class Usuario {
     @Column(nullable = false)
     private String nome;
 
-    @Column(unique = true, nullable = false)
-    private String email;
+    @Column(name = "usuario", unique = true, nullable = false)
+    private String usuario;
 
     @Column(nullable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -113,5 +114,19 @@ public class AlimentacaoController {
     public ResponseEntity<Void> deletarAlimentacao(@PathVariable Long id) {
         alimentacaoService.deletarAlimentacao(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Atualizar uma alimentação
+     * PUT /api/estoque/alimentacao/{id}
+     */
+    @PutMapping("/alimentacao/{id}")
+    public ResponseEntity<Alimentacao> atualizarAlimentacao(@PathVariable Long id, @RequestBody AlimentacaoRequest request) {
+        try {
+            Alimentacao atualizada = alimentacaoService.atualizarAlimentacao(id, request);
+            return ResponseEntity.ok(atualizada);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 }

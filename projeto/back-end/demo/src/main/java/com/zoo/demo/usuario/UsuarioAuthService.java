@@ -27,14 +27,14 @@ public class UsuarioAuthService {
     }
 
     public UsuarioLoginResponse login(UsuarioLoginRequest request) {
-        String email = normalize(request.getEmail());
+        String usuarioStr = normalize(request.getUsuario());
         String senha = request.getSenha() == null ? "" : request.getSenha().trim();
 
-        if (email.isBlank() || senha.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "E-mail e senha são obrigatórios");
+        if (usuarioStr.isBlank() || senha.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usuário e senha são obrigatórios");
         }
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Usuario usuario = usuarioRepository.findByUsuario(usuarioStr)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciais inválidas"));
 
         if (!usuario.isAtivo()) {
@@ -57,7 +57,7 @@ public class UsuarioAuthService {
         String accessToken = jwtService.gerarAccessToken(usuario);
         RefreshToken refreshToken = refreshTokenService.criarRefreshToken(usuario);
 
-        return new UsuarioLoginResponse(accessToken, refreshToken.getToken(), usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPerfil());
+        return new UsuarioLoginResponse(accessToken, refreshToken.getToken(), usuario.getId(), usuario.getNome(), usuario.getUsuario(), usuario.getPerfil());
     }
 
     public UsuarioLoginResponse refresh(String refreshTokenStr) {
@@ -71,7 +71,7 @@ public class UsuarioAuthService {
         Usuario usuario = refreshToken.getUsuario();
         String newAccessToken = jwtService.gerarAccessToken(usuario);
 
-        return new UsuarioLoginResponse(newAccessToken, refreshTokenStr, usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPerfil());
+        return new UsuarioLoginResponse(newAccessToken, refreshTokenStr, usuario.getId(), usuario.getNome(), usuario.getUsuario(), usuario.getPerfil());
     }
 
     public void logout(String refreshTokenStr) {
@@ -104,21 +104,21 @@ public class UsuarioAuthService {
 
     public Usuario criarUsuario(UsuarioRequest request) {
         String nome = safeTrim(request.getNome());
-        String email = normalize(request.getEmail());
+        String usuarioStr = normalize(request.getUsuario());
         String senha = safeTrim(request.getSenha());
         PerfilUsuario perfil = request.getPerfil();
 
-        if (nome.isBlank() || email.isBlank() || senha.isBlank() || perfil == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome, e-mail, senha e perfil são obrigatórios");
+        if (nome.isBlank() || usuarioStr.isBlank() || senha.isBlank() || perfil == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome, usuário, senha e perfil são obrigatórios");
         }
 
-        if (usuarioRepository.existsByEmail(email)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado");
+        if (usuarioRepository.existsByUsuario(usuarioStr)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Usuário já cadastrado");
         }
 
         Usuario usuario = new Usuario();
         usuario.setNome(nome);
-        usuario.setEmail(email);
+        usuario.setUsuario(usuarioStr);
         usuario.setSenha(passwordEncoder.encode(senha));
         usuario.setPerfil(perfil);
         usuario.setAtivo(request.getAtivo() == null || request.getAtivo());
@@ -128,22 +128,22 @@ public class UsuarioAuthService {
 
     public Usuario atualizarUsuario(Usuario existente, UsuarioRequest request) {
         String nome = safeTrim(request.getNome());
-        String email = normalize(request.getEmail());
+        String usuarioStr = normalize(request.getUsuario());
         String senha = safeTrim(request.getSenha());
         PerfilUsuario perfil = request.getPerfil();
 
-        if (nome.isBlank() || email.isBlank() || perfil == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome, e-mail e perfil são obrigatórios");
+        if (nome.isBlank() || usuarioStr.isBlank() || perfil == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome, usuário e perfil são obrigatórios");
         }
 
-        usuarioRepository.findByEmail(email)
+        usuarioRepository.findByUsuario(usuarioStr)
                 .filter(u -> !u.getId().equals(existente.getId()))
                 .ifPresent(u -> {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado");
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Usuário já cadastrado");
                 });
 
         existente.setNome(nome);
-        existente.setEmail(email);
+        existente.setUsuario(usuarioStr);
         existente.setPerfil(perfil);
         if (request.getAtivo() != null) {
             existente.setAtivo(request.getAtivo());

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   createAnimal,
   criarAlimentacaoPorHabitat,
+  updateAlimentacao,
   deleteAnimal,
   deletarAlimentacao,
   getAnimalsByHabitat,
@@ -185,6 +186,7 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
       setEditingAnimalId(null)
       load()
     } catch (e) {
+      // keep modals open and show the error inside them
       setError(String(e))
     } finally {
       setSaving(false)
@@ -249,9 +251,20 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
           nome: semanaAlimentacaoForm[value].trim(),
         }))
         .filter((item) => item.nome.length > 0)
-
       if (itensSemana.length === 0) {
         setError('Preencha ao menos um dia da semana')
+        setSaving(false)
+        return
+      }
+
+      // validate duplicates against existing alimentacoes in this habitat
+      const cardapioName = (cardapioForm.cardapio || '').trim() || 'Cardápio Semanal'
+      const duplicates = itensSemana.filter((item) =>
+        alimentacoes.some((a) => (a.cardapio || 'Cardápio Semanal').trim() === cardapioName && (a.diaSemana || '').trim() === item.diaSemana)
+      )
+
+      if (duplicates.length > 0) {
+        setError('Já existe alimentação cadastrada para pelo menos um dia selecionado neste cardápio')
         setSaving(false)
         return
       }
@@ -259,7 +272,7 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
       await Promise.all(
         itensSemana.map((item) =>
           criarAlimentacaoPorHabitat(habitatId, {
-            cardapio: cardapioForm.cardapio,
+            cardapio: cardapioName,
             diaSemana: item.diaSemana,
             nome: item.nome,
           })
@@ -274,6 +287,9 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
       setSemanaAlimentacaoForm(emptySemanaAlimentacao)
       setError(null)
     } catch (e) {
+      setShowCardapioModal(false)
+      setShowAnimalModal(false)
+      setShowEditAlimentacaoModal(false)
       setError(String(e))
     } finally {
       setSaving(false)
@@ -341,6 +357,50 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
     if (!habitat.id) return
     void loadAlimentacoes(habitat.id)
   }, [habitat.id])
+
+  // Edit alimentação modal state
+  const [showEditAlimentacaoModal, setShowEditAlimentacaoModal] = useState(false)
+  const [editAlimentacaoForm, setEditAlimentacaoForm] = useState<{ id?: number; nome: string; diaSemana?: string | null; cardapio?: string | null }>({ nome: '', diaSemana: null, cardapio: null })
+
+  const openEditAlimentacao = (alimentacao: Alimentacao) => {
+    setEditAlimentacaoForm({ id: alimentacao.id, nome: alimentacao.nome, diaSemana: alimentacao.diaSemana ?? null, cardapio: alimentacao.cardapio ?? null })
+    setShowEditAlimentacaoModal(true)
+  }
+
+  const handleSubmitEditAlimentacao = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editAlimentacaoForm.id || !habitat.id) return
+    try {
+      setSaving(true)
+      // check duplicates before updating
+      const cardapioName = (editAlimentacaoForm.cardapio || '').trim() || 'Cardápio Semanal'
+      const dia = (editAlimentacaoForm.diaSemana || '').trim()
+      const conflict = alimentacoes.some((a) => a.id !== editAlimentacaoForm.id && (a.cardapio || 'Cardápio Semanal').trim() === cardapioName && (a.diaSemana || '').trim() === dia)
+      if (conflict) {
+        setShowEditAlimentacaoModal(false)
+        setError('Já existe alimentação cadastrada para este dia no cardápio selecionado')
+        setSaving(false)
+        return
+      }
+
+      await updateAlimentacao(editAlimentacaoForm.id, {
+        nome: editAlimentacaoForm.nome,
+        diaSemana: editAlimentacaoForm.diaSemana,
+        cardapio: editAlimentacaoForm.cardapio,
+      })
+      await loadAlimentacoes(habitat.id)
+      setShowEditAlimentacaoModal(false)
+      setEditAlimentacaoForm({ nome: '', diaSemana: null, cardapio: null })
+      setError(null)
+    } catch (err) {
+      setShowEditAlimentacaoModal(false)
+      setShowCardapioModal(false)
+      setShowAnimalModal(false)
+      setError(String(err))
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="page">
@@ -494,6 +554,15 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
                                   {openMenuId === alimentacao.id && (
                                     <div className="action-dropdown">
                                       <button
+                                        className="action-item"
+                                        onClick={() => {
+                                          setOpenMenuId(null)
+                                          openEditAlimentacao(alimentacao)
+                                        }}
+                                      >
+                                        ✏️ Editar
+                                      </button>
+                                      <button
                                         className="action-item danger"
                                         onClick={() => {
                                           setOpenMenuId(null)
@@ -527,6 +596,8 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
                 ✕
               </button>
             </div>
+            {error && <div className="alert-error">{error}</div>}
+
             <form onSubmit={handleSubmit} className="modal-form">
               <label>
                 Nome popular <span className="required">*</span>
@@ -638,15 +709,46 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
                 ✕
               </button>
             </div>
+            {error && <div className="alert-error">{error}</div>}
+
             <form onSubmit={handleSubmitCardapio} className="modal-form">
               <label>
                 Cardápio <span className="required">*</span>
-                <input
-                  required
-                  placeholder="Ex: Cardápio Semanal Primatas"
-                  value={cardapioForm.cardapio}
-                  onChange={(e) => setCardapioForm({ ...cardapioForm, cardapio: e.target.value })}
-                />
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <select
+                    value={cardapioForm.cardapio || ''}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setCardapioForm({ ...cardapioForm, cardapio: val })
+                    }}
+                    style={{ flex: '0 0 220px' }}
+                  >
+                    <option value="">-- Novo cardápio --</option>
+                    {nomesCardapios.map((nome) => (
+                      <option key={nome} value={nome}>
+                        {nome}
+                      </option>
+                    ))}
+                  </select>
+
+                  {(() => {
+                    const selected = (cardapioForm.cardapio || '').trim()
+                    const isExisting = nomesCardapios.includes(selected)
+                    // show input only when creating a new cardápio (no existing selected)
+                    if (!selected || !isExisting) {
+                      return (
+                        <input
+                          required
+                          placeholder="Ex: Cardápio Semanal Primatas"
+                          value={cardapioForm.cardapio}
+                          onChange={(e) => setCardapioForm({ ...cardapioForm, cardapio: e.target.value })}
+                          style={{ flex: 1 }}
+                        />
+                      )
+                    }
+                    return null
+                  })()}
+                </div>
               </label>
 
               {diasSemanaOptions.map((option) => (
@@ -675,6 +777,69 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
                   onClick={() => setShowCardapioModal(false)}
                 >
                   Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {showEditAlimentacaoModal && (
+        <div className="modal-overlay" onClick={() => setShowEditAlimentacaoModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Editar Item do Cardápio</h2>
+              <button className="modal-close" onClick={() => setShowEditAlimentacaoModal(false)}>
+                ✕
+              </button>
+            </div>
+            {error && <div className="alert-error">{error}</div>}
+
+            <form onSubmit={handleSubmitEditAlimentacao} className="modal-form">
+              <label>
+                Nome <span className="required">*</span>
+                <input
+                  required
+                  value={editAlimentacaoForm.nome}
+                  onChange={(e) => setEditAlimentacaoForm((prev) => ({ ...prev, nome: e.target.value }))}
+                />
+              </label>
+
+              <label>
+                Dia da semana
+                <select
+                  value={editAlimentacaoForm.diaSemana || ''}
+                  onChange={(e) => setEditAlimentacaoForm((prev) => ({ ...prev, diaSemana: e.target.value || null }))}
+                >
+                  <option value="">(A definir)</option>
+                  {diasSemanaOptions.map((d) => (
+                    <option key={d.value} value={d.value}>
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Cardápio
+                <select
+                  value={editAlimentacaoForm.cardapio || ''}
+                  onChange={(e) => setEditAlimentacaoForm((prev) => ({ ...prev, cardapio: e.target.value || null }))}
+                >
+                  <option value="">Cardápio Semanal</option>
+                  {nomesCardapios.map((nome) => (
+                    <option key={nome} value={nome}>
+                      {nome}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="modal-actions">
+                <button type="button" className="btn-secondary" onClick={() => setShowEditAlimentacaoModal(false)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn-primary" disabled={saving}>
+                  {saving ? 'Salvando...' : 'Salvar'}
                 </button>
               </div>
             </form>

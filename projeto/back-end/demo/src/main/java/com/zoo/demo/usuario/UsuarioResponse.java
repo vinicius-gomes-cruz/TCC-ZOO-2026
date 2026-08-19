@@ -9,7 +9,7 @@ public class UsuarioResponse {
 
     private Long id;
     private String nome;
-    private String email;
+    private String usuario;
     private PerfilUsuario perfil;
     private boolean ativo;
 
@@ -17,7 +17,7 @@ public class UsuarioResponse {
         return new UsuarioResponse(
                 usuario.getId(),
                 usuario.getNome(),
-                usuario.getEmail(),
+                usuario.getUsuario(),
                 usuario.getPerfil(),
                 usuario.isAtivo()
         );
