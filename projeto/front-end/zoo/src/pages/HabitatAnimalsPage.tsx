@@ -194,12 +194,14 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
   }
 
   const openCreateAnimal = () => {
+    setError(null)
     setEditingAnimalId(null)
     setForm(emptyAnimal)
     setShowAnimalModal(true)
   }
 
   const openEditAnimal = (animal: Animal) => {
+    setError(null)
     setEditingAnimalId(animal.id ?? null)
     setForm({
       nomePopular: animal.nomePopular ?? '',
@@ -230,6 +232,7 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
       setError('Habitat inválido para criar cardápio')
       return
     }
+    setError(null)
     setCardapioForm(emptyCardapioForm)
     setSemanaAlimentacaoForm(emptySemanaAlimentacao)
     setShowCardapioModal(true)
@@ -287,9 +290,6 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
       setSemanaAlimentacaoForm(emptySemanaAlimentacao)
       setError(null)
     } catch (e) {
-      setShowCardapioModal(false)
-      setShowAnimalModal(false)
-      setShowEditAlimentacaoModal(false)
       setError(String(e))
     } finally {
       setSaving(false)
@@ -361,8 +361,10 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
   // Edit alimentação modal state
   const [showEditAlimentacaoModal, setShowEditAlimentacaoModal] = useState(false)
   const [editAlimentacaoForm, setEditAlimentacaoForm] = useState<{ id?: number; nome: string; diaSemana?: string | null; cardapio?: string | null }>({ nome: '', diaSemana: null, cardapio: null })
+  const showPageError = !!error && !showAnimalModal && !showCardapioModal && !showEditAlimentacaoModal
 
   const openEditAlimentacao = (alimentacao: Alimentacao) => {
+    setError(null)
     setEditAlimentacaoForm({ id: alimentacao.id, nome: alimentacao.nome, diaSemana: alimentacao.diaSemana ?? null, cardapio: alimentacao.cardapio ?? null })
     setShowEditAlimentacaoModal(true)
   }
@@ -377,7 +379,6 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
       const dia = (editAlimentacaoForm.diaSemana || '').trim()
       const conflict = alimentacoes.some((a) => a.id !== editAlimentacaoForm.id && (a.cardapio || 'Cardápio Semanal').trim() === cardapioName && (a.diaSemana || '').trim() === dia)
       if (conflict) {
-        setShowEditAlimentacaoModal(false)
         setError('Já existe alimentação cadastrada para este dia no cardápio selecionado')
         setSaving(false)
         return
@@ -393,9 +394,6 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
       setEditAlimentacaoForm({ nome: '', diaSemana: null, cardapio: null })
       setError(null)
     } catch (err) {
-      setShowEditAlimentacaoModal(false)
-      setShowCardapioModal(false)
-      setShowAnimalModal(false)
       setError(String(err))
     } finally {
       setSaving(false)
@@ -419,7 +417,7 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
         </div>
       </div>
 
-      {error && <div className="alert-error">{error}</div>}
+      {showPageError && <div className="alert-error">{error}</div>}
 
       {loading ? (
         <div className="loading">Carregando animais...</div>
@@ -596,9 +594,9 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
                 ✕
               </button>
             </div>
-            {error && <div className="alert-error">{error}</div>}
 
             <form onSubmit={handleSubmit} className="modal-form">
+              {error && <div className="alert-error alert-error-form">{error}</div>}
               <label>
                 Nome popular <span className="required">*</span>
                 <input
@@ -709,9 +707,9 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
                 ✕
               </button>
             </div>
-            {error && <div className="alert-error">{error}</div>}
 
             <form onSubmit={handleSubmitCardapio} className="modal-form">
+              {error && <div className="alert-error alert-error-form">{error}</div>}
               <label>
                 Cardápio <span className="required">*</span>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -792,9 +790,9 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
                 ✕
               </button>
             </div>
-            {error && <div className="alert-error">{error}</div>}
 
             <form onSubmit={handleSubmitEditAlimentacao} className="modal-form">
+              {error && <div className="alert-error alert-error-form">{error}</div>}
               <label>
                 Nome <span className="required">*</span>
                 <input

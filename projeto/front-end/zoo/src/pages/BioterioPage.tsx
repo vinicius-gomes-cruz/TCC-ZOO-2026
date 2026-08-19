@@ -361,6 +361,8 @@ export default function BioterioPage() {
               </button>
             </div>
 
+            {error && <div className="alert-error">{error}</div>}
+
             <form className="modal-form" onSubmit={handleSaveEdit}>
               <label>
                 Grupo de Fêmeas

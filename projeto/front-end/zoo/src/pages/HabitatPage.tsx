@@ -58,6 +58,7 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
   useEffect(load, [])
 
   const openCreate = () => {
+    setError(null)
     setEditing(null)
     setForm(emptyHabitat)
     setReqInput('')
@@ -66,6 +67,7 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
   }
 
   const openEdit = (habitat: Habitat) => {
+    setError(null)
     setEditing(habitat)
     setForm({
       ...habitat,
@@ -150,11 +152,9 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
   return (
     <div className="page" onClick={() => setOpenMenuId(null)}>
       <div className="page-header">
-            </div>
-
-            {error && <div className="alert-error">{error}</div>}
-
-            <form onSubmit={handleSubmit} className="modal-form">
+        <div>
+          <h1 className="page-title">Habitats</h1>
+          <p className="page-subtitle">Gerencie os habitats do zoológico</p>
         </div>
         <button className="btn-primary" onClick={openCreate}>
           + Novo Habitat
@@ -294,6 +294,9 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
               <h2>{editing ? 'Editar Habitat' : 'Novo Habitat'}</h2>
               <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
             </div>
+
+            {error && <div className="alert-error">{error}</div>}
+
             <form onSubmit={handleSubmit} className="modal-form">
               <label>
                 Nome <span className="required">*</span>

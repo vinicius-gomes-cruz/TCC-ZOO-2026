@@ -588,6 +588,15 @@
   margin-bottom: 16px;
 }
 
+.alert-error-form {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.35;
+  width: fit-content;
+  max-width: 100%;
+}
+
 .loading {
   text-align: center;
   color: #5f6368;
