@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createHabitat, deleteHabitat, getHabitats, updateHabitat } from '../api'
 
-export interface Requerimento {
-  descricao: string
-  dataAdicionada: string
-  dataRemovida?: string
-}
-
 export interface EnriquecimentoAmbiental {
   descricao: string
   dataAdicionada: string
@@ -18,7 +12,6 @@ export interface Habitat {
   nome: string
   descricao: string
   animais: string[]
-  requerimentos: Requerimento[]
   enriquecimentoAmbiental: EnriquecimentoAmbiental[]
 }
 
@@ -30,7 +23,6 @@ const emptyHabitat: Habitat = {
   nome: '',
   descricao: '',
   animais: [],
-  requerimentos: [],
   enriquecimentoAmbiental: [],
 }
 
@@ -42,7 +34,6 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState<Habitat | null>(null)
   const [form, setForm] = useState<Habitat>(emptyHabitat)
-  const [reqInput, setReqInput] = useState('')
   const [enriqInput, setEnriqInput] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -61,7 +52,6 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
     setError(null)
     setEditing(null)
     setForm(emptyHabitat)
-    setReqInput('')
     setEnriqInput('')
     setShowModal(true)
   }
@@ -71,10 +61,8 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
     setEditing(habitat)
     setForm({
       ...habitat,
-      requerimentos: [...(habitat.requerimentos ?? [])],
       enriquecimentoAmbiental: [...(habitat.enriquecimentoAmbiental ?? [])],
     })
-    setReqInput('')
     setEnriqInput('')
     setShowModal(true)
   }
@@ -106,25 +94,6 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
     } finally {
       setSaving(false)
     }
-  }
-
-  const addReq = () => {
-    if (!reqInput.trim()) return
-    const newReq: Requerimento = {
-      descricao: reqInput.trim(),
-      dataAdicionada: new Date().toISOString(),
-    }
-    setForm((prev) => ({ ...prev, requerimentos: [...prev.requerimentos, newReq] }))
-    setReqInput('')
-  }
-
-  const removeReq = (index: number) => {
-    setForm((prev) => ({
-      ...prev,
-      requerimentos: prev.requerimentos.map((r, i) =>
-        i === index ? { ...r, dataRemovida: new Date().toISOString() } : r
-      ),
-    }))
   }
 
   const addEnriq = () => {
@@ -239,27 +208,6 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
                   <p className="habitat-card-desc">{h.descricao}</p>
                 )}
 
-                {(h.requerimentos ?? []).length > 0 && (
-                  <div className="habitat-card-section">
-                    <span className="habitat-card-label">📋 Requerimentos</span>
-                    <div className="tag-list">
-                      {h.requerimentos.map((r, i) => (
-                        <span key={i} className="tag tag-blue">
-                          {r.descricao}
-                          <br />
-                          <small>Adicionado: {new Date(r.dataAdicionada).toLocaleDateString('pt-BR')}</small>
-                          {r.dataRemovida && (
-                            <>
-                              <br />
-                              <small>Removido: {new Date(r.dataRemovida).toLocaleDateString('pt-BR')}</small>
-                            </>
-                          )}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {(h.enriquecimentoAmbiental ?? []).length > 0 && (
                   <div className="habitat-card-section">
                     <span className="habitat-card-label">🧩 Enriquecimento ambiental</span>
@@ -317,37 +265,6 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
                   rows={3}
                 />
               </label>
-
-              <label>Requerimentos</label>
-              <div className="tag-input-row">
-                <input
-                  value={reqInput}
-                  onChange={(e) => setReqInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') { e.preventDefault(); addReq() }
-                  }}
-                  placeholder="Ex: Temperatura 25-30°C..."
-                />
-                <button type="button" className="btn-add" onClick={addReq}>
-                  Adicionar
-                </button>
-              </div>
-              <div className="tag-list">
-                {form.requerimentos.map((r, i) => (
-                  <span key={i} className="tag tag-blue tag-removable">
-                    {r.descricao}
-                    <br />
-                    <small>Adicionado: {new Date(r.dataAdicionada).toLocaleDateString('pt-BR')}</small>
-                    {r.dataRemovida && (
-                      <>
-                        <br />
-                        <small>Removido: {new Date(r.dataRemovida).toLocaleDateString('pt-BR')}</small>
-                      </>
-                    )}
-                    <button type="button" onClick={() => removeReq(i)}>×</button>
-                  </span>
-                ))}
-              </div>
 
               <label>Enriquecimento ambiental</label>
               <div className="tag-input-row">

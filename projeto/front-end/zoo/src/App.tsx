@@ -27,6 +27,7 @@ function App() {
   const [selectedHabitat, setSelectedHabitat] = useState<Habitat | null>(null)
   const [usuarioLogado, setUsuarioLogado] = useState<UsuarioLogado | null>(null)
   const [carregandoSessao, setCarregandoSessao] = useState(true)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     const restaurarSessao = async () => {
@@ -108,26 +109,34 @@ function App() {
           <span className="logo-text">
             <span className="logo-zoo">Zoo</span>Gestor
           </span>
+          <button
+            className="menu-toggle"
+            aria-label="Abrir menu"
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen((open) => !open)}
+          >
+            {mobileMenuOpen ? '✕' : '☰'}
+          </button>
         </div>
 
-        <nav className="sidebar-nav">
+        <nav className={`sidebar-nav ${mobileMenuOpen ? 'open' : ''}`}>
           <button
             className={`nav-item ${currentPage === 'habitats' ? 'active' : ''}`}
-            onClick={() => setCurrentPage('habitats')}
+            onClick={() => { setCurrentPage('habitats'); setMobileMenuOpen(false) }}
           >
             <span className="nav-icon">🌿</span>
             Habitats
           </button>
           <button
             className={`nav-item ${currentPage === 'bioterio' ? 'active' : ''}`}
-            onClick={() => setCurrentPage('bioterio')}
+            onClick={() => { setCurrentPage('bioterio'); setMobileMenuOpen(false) }}
           >
             <span className="nav-icon">🧬</span>
             Bioterio
           </button>
           <button
             className={`nav-item ${currentPage === 'estoque' ? 'active' : ''}`}
-            onClick={() => setCurrentPage('estoque')}
+            onClick={() => { setCurrentPage('estoque'); setMobileMenuOpen(false) }}
           >
             <span className="nav-icon">📦</span>
             Estoque
@@ -135,7 +144,7 @@ function App() {
           {isAdmin && (
             <button
               className={`nav-item ${currentPage === 'usuarios' ? 'active' : ''}`}
-              onClick={() => setCurrentPage('usuarios')}
+              onClick={() => { setCurrentPage('usuarios'); setMobileMenuOpen(false) }}
             >
               <span className="nav-icon">👤</span>
               Usuários
@@ -143,8 +152,8 @@ function App() {
           )}
         </nav>
 
-        <div className="sidebar-footer">
-          <button className="nav-item nav-item-logout" onClick={handleLogout}>
+        <div className={`sidebar-footer ${mobileMenuOpen ? 'open' : ''}`}>
+          <button className="nav-item nav-item-logout" onClick={() => { handleLogout(); setMobileMenuOpen(false) }}>
             <span className="nav-icon">🚪</span>
             Sair
           </button>

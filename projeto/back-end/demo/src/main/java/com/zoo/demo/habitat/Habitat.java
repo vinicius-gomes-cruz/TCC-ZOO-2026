@@ -28,10 +28,6 @@ public class Habitat {
     private String descricao;
 
     @ElementCollection
-    @CollectionTable(name = "habitat_requerimentos", joinColumns = @JoinColumn(name = "habitat_id"))
-    private List<Requerimento> requerimentos = new ArrayList<>();
-
-    @ElementCollection
     @CollectionTable(name = "habitat_animais", joinColumns = @JoinColumn(name = "habitat_id"))
     @Column(name = "animal")
     private List<String> animais = new ArrayList<>();
