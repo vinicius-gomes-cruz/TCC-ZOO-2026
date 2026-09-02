@@ -30,7 +30,6 @@
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/habitat/Habitat.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/habitat/HabitatController.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/habitat/HabitatRepository.java
-/home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/habitat/Requerimento.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/usuario/AuthController.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/usuario/JwtService.java
 /home/aluno/TCC-ZOO-2026/projeto/back-end/demo/src/main/java/com/zoo/demo/usuario/PerfilUsuario.java

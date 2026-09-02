@@ -14,4 +14,5 @@ public class CaixaRequest {
     private String machosRotativos;
     private String dataNascimento;
     private String dataDesmame;
+    private Long animalId;
 }

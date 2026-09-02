@@ -174,6 +174,15 @@ export type CaixaRequestPayload = {
   machosRotativos?: string | null
   dataNascimento?: string | null
   dataDesmame?: string | null
+  animalId?: number | null
+}
+
+export type AnimalResumo = {
+  id: number
+  nomePopular: string | null
+  apelido: string | null
+  especie: string | null
+  camposBioterio: string | null
 }
 
 export type BioterioAnotacaoRequestPayload = {
@@ -274,6 +283,23 @@ export async function getAnimalsByHabitat(habitatId: number) {
     credentials: 'include',
   });
   return handleResponse(res);
+}
+
+export async function getAnimais(): Promise<AnimalResumo[]> {
+  const res = await fetch(`${API_BASE}/api/animais`, {
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function updateCamposBioterioAnimal(animalId: number, camposBioterio: string): Promise<AnimalResumo> {
+  const res = await fetch(`${API_BASE}/api/animais/${animalId}/campos-bioterio`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ camposBioterio }),
+    credentials: 'include',
+  })
+  return handleResponse(res)
 }
 
 export async function createAnimal(payload: any) {

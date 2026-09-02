@@ -43,6 +43,9 @@ public class Animal {
     @Column(columnDefinition = "TEXT")
     private String alimentacao;
 
+    @Column(columnDefinition = "TEXT")
+    private String camposBioterio;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "habitat_id")
     private Habitat habitat;

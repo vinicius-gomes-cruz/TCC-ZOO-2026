@@ -1,12 +1,21 @@
 package com.zoo.demo.animal;
 
-import com.zoo.demo.habitat.Habitat;
-import com.zoo.demo.habitat.HabitatRepository;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.net.URI;
 import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.zoo.demo.habitat.Habitat;
+import com.zoo.demo.habitat.HabitatRepository;
 
 @RestController
 @RequestMapping("/api/animais")
@@ -49,6 +58,7 @@ public class AnimalController {
         animal.setObservacaoSaude(request.getObservacaoSaude());
         animal.setTratamentosFeitos(request.getTratamentosFeitos());
         animal.setAlimentacao(request.getAlimentacao());
+        animal.setCamposBioterio(request.getCamposBioterio());
 
         if (request.getHabitatId() != null) {
             Habitat habitat = habitatRepository.findById(request.getHabitatId())
@@ -73,6 +83,7 @@ public class AnimalController {
                     existing.setObservacaoSaude(request.getObservacaoSaude());
                     existing.setTratamentosFeitos(request.getTratamentosFeitos());
                     existing.setAlimentacao(request.getAlimentacao());
+                    existing.setCamposBioterio(request.getCamposBioterio());
 
                     if (request.getHabitatId() != null) {
                         Habitat habitat = habitatRepository.findById(request.getHabitatId())
@@ -82,6 +93,18 @@ public class AnimalController {
                         existing.setHabitat(null);
                     }
 
+                    Animal updated = animalRepository.save(existing);
+                    return ResponseEntity.ok(updated);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{id}/campos-bioterio")
+    public ResponseEntity<Animal> updateCamposBioterio(@PathVariable Long id,
+            @RequestBody AnimalCamposBioterioRequest request) {
+        return animalRepository.findById(id)
+                .map(existing -> {
+                    existing.setCamposBioterio(request.getCamposBioterio());
                     Animal updated = animalRepository.save(existing);
                     return ResponseEntity.ok(updated);
                 })

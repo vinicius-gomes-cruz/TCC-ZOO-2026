@@ -25,7 +25,6 @@ com/zoo/demo/WebConfig.class
 com/zoo/demo/usuario/UsuarioLoginResponse.class
 com/zoo/demo/Application.class
 com/zoo/demo/animal/Animal.class
-com/zoo/demo/habitat/Requerimento.class
 com/zoo/demo/usuario/RefreshToken.class
 com/zoo/demo/animal/AnimalController.class
 com/zoo/demo/habitat/HabitatController.class

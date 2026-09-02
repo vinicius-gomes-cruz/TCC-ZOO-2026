@@ -65,7 +65,7 @@ function LoginPage({ onLogin }: LoginPageProps) {
           <input
             id="usuario"
             type="text"
-            placeholder="seu.usuario"
+            placeholder="Digite seu Usuario"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />

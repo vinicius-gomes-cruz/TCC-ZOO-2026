@@ -16,5 +16,6 @@ public class AnimalRequest {
     private String observacaoSaude;
     private String tratamentosFeitos;
     private String alimentacao;
+    private String camposBioterio;
     private Long habitatId;
 }

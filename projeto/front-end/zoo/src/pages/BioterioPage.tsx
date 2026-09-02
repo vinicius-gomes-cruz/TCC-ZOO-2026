@@ -1,37 +1,89 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
+  createAnimal,
   createCaixa,
+  deleteAnimal,
   deleteCaixa,
   enviarRacaoParaBioterio,
   finalizarRacaoNoBioterio,
+  getAnimais,
   getCaixas,
   listarRacoesDisponiveis,
   listarRacoesNoBioterio,
   updateCaixa,
+  type AnimalResumo,
   type CaixaRequestPayload,
   type ItemEstoqueRacao,
 } from '../api'
 import BioterioAnotacoesPage from './BioterioAnotacoesPage'
 
+type AnimalDaCaixa = {
+  id: number
+  nomePopular: string | null
+  apelido: string | null
+  especie: string | null
+  camposBioterio: string | null
+} | null
+
 type Caixa = {
   id: number
-  numeroCaixa: number
+  numeroCaixa: number | null
   grupoFemeas: string | null
+  idadeFemeas: string | null
   crias: string | null
   machosRotativos: string | null
   dataNascimento: string | null
   dataDesmame: string | null
+  animal: AnimalDaCaixa
 }
+
+type CampoCaixa =
+  | 'grupoFemeas'
+  | 'idadeFemeas'
+  | 'machosRotativos'
+  | 'crias'
+  | 'dataNascimento'
+  | 'dataDesmame'
+
+const OPCOES_CAMPOS: Array<{ key: CampoCaixa; label: string }> = [
+  { key: 'grupoFemeas', label: 'Grupo de Fêmeas' },
+  { key: 'idadeFemeas', label: 'Idade das Fêmeas' },
+  { key: 'machosRotativos', label: 'Grupo de Machos' },
+  { key: 'crias', label: 'Crias' },
+  { key: 'dataNascimento', label: 'Data de Nascimento' },
+  { key: 'dataDesmame', label: 'Data de Desmame' },
+]
+
+const CAMPOS_PADRAO: CampoCaixa[] = OPCOES_CAMPOS.map((opcao) => opcao.key)
 
 const textoOuTraco = (valor?: string | null) => {
   const texto = valor?.trim()
   return texto && texto.length > 0 ? texto : '—'
 }
 
+const identificadorCaixa = (caixa: Caixa) => caixa.numeroCaixa ?? caixa.id
+
+const nomeAnimal = (animal: AnimalDaCaixa) => {
+  if (!animal) return 'Sem animal definido'
+  return animal.apelido?.trim() || animal.nomePopular?.trim() || animal.especie?.trim() || 'Animal sem nome'
+}
+
+const parseCamposBioterio = (camposBioterio?: string | null): CampoCaixa[] => {
+  if (!camposBioterio?.trim()) return CAMPOS_PADRAO
+
+  const campos = camposBioterio
+    .split(',')
+    .map((valor) => valor.trim() as CampoCaixa)
+    .filter((valor) => CAMPOS_PADRAO.includes(valor))
+
+  return campos.length > 0 ? campos : CAMPOS_PADRAO
+}
+
 export default function BioterioPage() {
   const [telaInterna, setTelaInterna] = useState<'caixas' | 'anotacoes'>('caixas')
   const [caixas, setCaixas] = useState<Caixa[]>([])
+  const [animais, setAnimais] = useState<AnimalResumo[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -42,8 +94,18 @@ export default function BioterioPage() {
   const [showPegarRacao, setShowPegarRacao] = useState(false)
   const [racaoSelecionada, setRacaoSelecionada] = useState('')
   const [pacotesParaEnviar, setPacotesParaEnviar] = useState('')
+  const [animalFiltroId, setAnimalFiltroId] = useState('')
+  const [showNovoAnimalModal, setShowNovoAnimalModal] = useState(false)
+  const [novoAnimalNome, setNovoAnimalNome] = useState('')
+  const [novoAnimalCampos, setNovoAnimalCampos] = useState<CampoCaixa[]>(CAMPOS_PADRAO)
+  const [savingAnimal, setSavingAnimal] = useState(false)
+  const [deletingAnimal, setDeletingAnimal] = useState(false)
   const [form, setForm] = useState({
+    animalId: '',
+    numeroCaixa: '',
+    camposHabilitados: CAMPOS_PADRAO,
     grupoFemeas: '',
+    idadeFemeas: '',
     crias: '',
     machosRotativos: '',
     dataNascimento: '',
@@ -66,19 +128,39 @@ export default function BioterioPage() {
     listarRacoesNoBioterio()
       .then((list) => setRacoesNoBioterio(Array.isArray(list) ? list : []))
       .catch(() => setRacoesNoBioterio([]))
+
+    getAnimais()
+      .then((list) => {
+        const animaisLista = Array.isArray(list) ? list : []
+        const animaisOrdenados = animaisLista
+          .slice()
+          .sort((a, b) => nomeAnimal(a).localeCompare(nomeAnimal(b), 'pt-BR'))
+
+        setAnimais(animaisOrdenados)
+        setAnimalFiltroId((atual) => {
+          if (atual && animaisOrdenados.some((animal) => String(animal.id) === atual)) {
+            return atual
+          }
+          return animaisOrdenados[0] ? String(animaisOrdenados[0].id) : ''
+        })
+      })
+      .catch(() => setAnimais([]))
   }
 
   useEffect(load, [])
 
-  const handleCreate = async () => {
-    setError(null)
+  const handleCreateCaixaDireto = async () => {
+    if (!animalFiltroId) {
+      setError('Selecione um animal antes de criar a caixa.')
+      return
+    }
 
     try {
       setSaving(true)
-      await createCaixa({})
+      setError(null)
+      await createCaixa({ animalId: Number(animalFiltroId) })
       load()
     } catch (e) {
-      setShowModal(false)
       setError(String(e))
     } finally {
       setSaving(false)
@@ -86,7 +168,7 @@ export default function BioterioPage() {
   }
 
   const handleDelete = async (caixa: Caixa) => {
-    if (!window.confirm(`Deseja excluir a Caixa #${caixa.id}?`)) return
+    if (!window.confirm(`Deseja excluir a Caixa #${identificadorCaixa(caixa)}?`)) return
 
     try {
       setSaving(true)
@@ -103,8 +185,13 @@ export default function BioterioPage() {
   const openEdit = (caixa: Caixa) => {
     setError(null)
     setEditingCaixa(caixa)
+    const campos = parseCamposBioterio(caixa.animal?.camposBioterio)
     setForm({
+      animalId: caixa.animal?.id ? String(caixa.animal.id) : '',
+      numeroCaixa: caixa.numeroCaixa ? String(caixa.numeroCaixa) : '',
+      camposHabilitados: campos,
       grupoFemeas: caixa.grupoFemeas ?? '',
+      idadeFemeas: caixa.idadeFemeas ?? '',
       crias: caixa.crias ?? '',
       machosRotativos: caixa.machosRotativos ?? '',
       dataNascimento: caixa.dataNascimento ?? '',
@@ -118,14 +205,108 @@ export default function BioterioPage() {
     setEditingCaixa(null)
   }
 
-  const handleSaveEdit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleCriarAnimal = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if (!editingCaixa) return
+    const nome = novoAnimalNome.trim()
+    if (!nome) {
+      setError('Informe o nome do animal.')
+      return
+    }
+
+    if (novoAnimalCampos.length === 0) {
+      setError('Selecione ao menos um campo para o animal.')
+      return
+    }
+
+    try {
+      setSavingAnimal(true)
+      setError(null)
+      const animalCriado = await createAnimal({
+        nomePopular: nome,
+        camposBioterio: novoAnimalCampos.join(','),
+      }) as AnimalResumo
+
+      const novaLista = [...animais, animalCriado].sort((a, b) => nomeAnimal(a).localeCompare(nomeAnimal(b), 'pt-BR'))
+      setAnimais(novaLista)
+      setAnimalFiltroId(String(animalCriado.id))
+      setNovoAnimalNome('')
+      setNovoAnimalCampos(CAMPOS_PADRAO)
+      setShowNovoAnimalModal(false)
+    } catch (e) {
+      setError(String(e))
+    } finally {
+      setSavingAnimal(false)
+    }
+  }
+
+  const handleChangeAnimal = (animalId: string) => {
+    const animalSelecionado = animais.find((animal) => String(animal.id) === animalId)
+    setForm((prev) => ({
+      ...prev,
+      animalId,
+      camposHabilitados: parseCamposBioterio(animalSelecionado?.camposBioterio),
+    }))
+  }
+
+  const handleExcluirAnimalSelecionado = async () => {
+    if (!animalFiltroId) return
+
+    const animalSelecionado = animais.find((animal) => String(animal.id) === animalFiltroId)
+    if (!animalSelecionado) return
+
+    const totalCaixas = caixas.filter((caixa) => String(caixa.animal?.id ?? '') === animalFiltroId).length
+    if (totalCaixas > 0) {
+      setError('Não é possível excluir este animal porque existem caixas vinculadas. Exclua as caixas primeiro.')
+      return
+    }
+
+    if (!window.confirm(`Deseja excluir o animal "${nomeAnimal(animalSelecionado)}"?`)) return
+
+    try {
+      setDeletingAnimal(true)
+      setError(null)
+      await deleteAnimal(Number(animalFiltroId))
+
+      const novaLista = animais.filter((animal) => String(animal.id) !== animalFiltroId)
+      setAnimais(novaLista)
+      setAnimalFiltroId(novaLista[0] ? String(novaLista[0].id) : '')
+    } catch (e) {
+      setError(String(e))
+    } finally {
+      setDeletingAnimal(false)
+    }
+  }
+
+  const alternarCampoNovoAnimal = (campo: CampoCaixa) => {
+    setNovoAnimalCampos((prev) => {
+      if (prev.includes(campo)) {
+        return prev.filter((item) => item !== campo)
+      }
+      return [...prev, campo]
+    })
+  }
+
+  const handleSave = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const animalId = Number(form.animalId)
+    if (!animalId) {
+      setError('Selecione o animal da caixa.')
+      return
+    }
+
+    const numeroCaixa = form.numeroCaixa.trim() ? Number(form.numeroCaixa) : null
+    if (numeroCaixa !== null && (!Number.isInteger(numeroCaixa) || numeroCaixa <= 0)) {
+      setError('Número da caixa deve ser um número inteiro positivo.')
+      return
+    }
 
     const payload: CaixaRequestPayload = {
-      numeroCaixa: editingCaixa.numeroCaixa ?? null,
+      numeroCaixa,
+      animalId,
       grupoFemeas: form.grupoFemeas.trim() || null,
+      idadeFemeas: form.idadeFemeas.trim() || null,
       crias: form.crias.trim() || null,
       machosRotativos: form.machosRotativos.trim() || null,
       dataNascimento: form.dataNascimento || null,
@@ -135,7 +316,11 @@ export default function BioterioPage() {
     try {
       setSaving(true)
       setError(null)
-      await updateCaixa(editingCaixa.id, payload)
+
+      if (editingCaixa) {
+        await updateCaixa(editingCaixa.id, payload)
+      }
+
       closeModal()
       load()
     } catch (e) {
@@ -187,6 +372,22 @@ export default function BioterioPage() {
     }
   }
 
+  const animalSelecionado = animais.find((animal) => String(animal.id) === animalFiltroId) ?? null
+  const camposVisiveisAnimal = parseCamposBioterio(animalSelecionado?.camposBioterio)
+  const exibirCampo = (campo: CampoCaixa) => camposVisiveisAnimal.includes(campo)
+
+  const caixasFiltradas = animalFiltroId
+    ? caixas
+      .filter((caixa) => String(caixa.animal?.id ?? '') === animalFiltroId)
+      .slice()
+      .sort((a, b) => {
+        const numeroA = a.numeroCaixa ?? Number.MAX_SAFE_INTEGER
+        const numeroB = b.numeroCaixa ?? Number.MAX_SAFE_INTEGER
+        if (numeroA !== numeroB) return numeroA - numeroB
+        return a.id - b.id
+      })
+    : []
+
   if (telaInterna === 'anotacoes') {
     return <BioterioAnotacoesPage onVoltar={() => setTelaInterna('caixas')} />
   }
@@ -202,8 +403,8 @@ export default function BioterioPage() {
           <button className="btn-secondary" onClick={() => setTelaInterna('anotacoes')}>
             Ver anotações
           </button>
-          <button className="btn-primary" onClick={handleCreate} disabled={saving}>
-            {saving ? 'Criando...' : '+ Novo Item'}
+          <button className="btn-primary" onClick={handleCreateCaixaDireto} disabled={saving}>
+            + Nova Caixa
           </button>
         </div>
       </div>
@@ -304,36 +505,76 @@ export default function BioterioPage() {
         )}
       </div>
 
+      {!loading && (
+        <div className="table-container bioterio-filtro-card">
+          <div className="page-header bioterio-filtro-header">
+            <label className="bioterio-filtro-field">
+              Animal
+              <select
+                value={animalFiltroId}
+                onChange={(e) => setAnimalFiltroId(e.target.value)}
+                disabled={animais.length === 0}
+              >
+                {animais.length === 0 ? (
+                  <option value="">Nenhum animal cadastrado</option>
+                ) : (
+                  animais.map((animal) => (
+                    <option key={animal.id} value={animal.id}>
+                      {nomeAnimal(animal)}
+                    </option>
+                  ))
+                )}
+              </select>
+            </label>
+
+            <div className="page-actions">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={handleExcluirAnimalSelecionado}
+                disabled={animais.length === 0 || deletingAnimal || savingAnimal}
+              >
+                {deletingAnimal ? 'Excluindo...' : 'Excluir Animal'}
+              </button>
+              <button type="button" className="btn-primary" onClick={() => setShowNovoAnimalModal(true)}>
+                + Adicionar Animal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="loading">Carregando...</div>
       ) : caixas.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">🧬</div>
-          <p>Nenhum item do bioterio cadastrado. Clique em "Novo Item" para começar.</p>
+          <p>Nenhuma caixa cadastrada. Clique em "+ Nova Caixa" para começar.</p>
         </div>
       ) : (
+        <>
         <div className="table-container">
         <table className="table">
           <thead>
             <tr>
-              <th>Caixa (ID)</th>
-              <th>Grupo de Fêmeas</th>
-              <th>Grupo de Machos</th>
-              <th>Crias</th>
-              <th>Data de Nascimento</th>
-              <th>Data de Desmame</th>
+              <th>Caixa</th>
+              {exibirCampo('grupoFemeas') && <th>Grupo de Fêmeas</th>}
+              {exibirCampo('machosRotativos') && <th>Grupo de Machos</th>}
+              {exibirCampo('crias') && <th>Crias</th>}
+              {exibirCampo('dataNascimento') && <th>Data de Nascimento</th>}
+              {exibirCampo('dataDesmame') && <th>Data de Desmame</th>}
               <th>Ações</th>
             </tr>
           </thead>
           <tbody>
-            {caixas.map((caixa) => (
+            {caixasFiltradas.map((caixa) => (
               <tr key={caixa.id}>
-                <td>#{caixa.id}</td>
-                <td>{textoOuTraco(caixa.grupoFemeas)}</td>
-                <td>{textoOuTraco(caixa.machosRotativos)}</td>
-                <td>{textoOuTraco(caixa.crias)}</td>
-                <td>{textoOuTraco(caixa.dataNascimento)}</td>
-                <td>{textoOuTraco(caixa.dataDesmame)}</td>
+                <td>#{identificadorCaixa(caixa)}</td>
+                {exibirCampo('grupoFemeas') && <td>{textoOuTraco(caixa.grupoFemeas)}</td>}
+                {exibirCampo('machosRotativos') && <td>{textoOuTraco(caixa.machosRotativos)}</td>}
+                {exibirCampo('crias') && <td>{textoOuTraco(caixa.crias)}</td>}
+                {exibirCampo('dataNascimento') && <td>{textoOuTraco(caixa.dataNascimento)}</td>}
+                {exibirCampo('dataDesmame') && <td>{textoOuTraco(caixa.dataDesmame)}</td>}
                 <td>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button className="btn-secondary" onClick={() => openEdit(caixa)} disabled={saving}>
@@ -349,13 +590,70 @@ export default function BioterioPage() {
           </tbody>
         </table>
         </div>
+        </>
       )}
 
-      {showModal && editingCaixa && (
+      {showNovoAnimalModal && (
+        <div className="modal-overlay" onClick={() => setShowNovoAnimalModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Adicionar animal</h2>
+              <button className="modal-close" onClick={() => setShowNovoAnimalModal(false)} aria-label="Fechar modal">
+                ✕
+              </button>
+            </div>
+
+            {error && <div className="alert-error">{error}</div>}
+
+            <form className="modal-form" onSubmit={handleCriarAnimal}>
+              <label>
+                Nome do animal
+                <input
+                  value={novoAnimalNome}
+                  onChange={(e) => setNovoAnimalNome(e.target.value)}
+                  placeholder="Ex: Camundongo Branco"
+                  required
+                />
+              </label>
+
+              <fieldset className="bioterio-checkbox-fieldset">
+                <legend className="bioterio-checkbox-legend">
+                  Campos necessários para o animal
+                </legend>
+
+                <div className="bioterio-checkbox-list">
+                  {OPCOES_CAMPOS.map((opcao) => (
+                    <label key={opcao.key} className="bioterio-checkbox-item">
+                      <input
+                        type="checkbox"
+                        className="bioterio-checkbox-input"
+                        checked={novoAnimalCampos.includes(opcao.key)}
+                        onChange={() => alternarCampoNovoAnimal(opcao.key)}
+                      />
+                      {opcao.label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <div className="modal-actions">
+                <button type="button" className="btn-secondary" onClick={() => setShowNovoAnimalModal(false)} disabled={savingAnimal}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn-primary" disabled={savingAnimal}>
+                  {savingAnimal ? 'Salvando...' : 'Salvar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showModal && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Editar Caixa #{editingCaixa.id}</h2>
+              <h2>{`Editar Caixa #${editingCaixa ? identificadorCaixa(editingCaixa) : ''}`}</h2>
               <button className="modal-close" onClick={closeModal} aria-label="Fechar modal">
                 ✕
               </button>
@@ -363,7 +661,35 @@ export default function BioterioPage() {
 
             {error && <div className="alert-error">{error}</div>}
 
-            <form className="modal-form" onSubmit={handleSaveEdit}>
+            <form className="modal-form" onSubmit={handleSave}>
+              <label>
+                Animal da caixa
+                <select
+                  value={form.animalId}
+                  onChange={(e) => handleChangeAnimal(e.target.value)}
+                  required
+                >
+                  <option value="">Selecione...</option>
+                  {animais.map((animal) => (
+                    <option key={animal.id} value={animal.id}>
+                      {nomeAnimal(animal)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Número da caixa (opcional)
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={form.numeroCaixa}
+                  onChange={(e) => setForm((prev) => ({ ...prev, numeroCaixa: e.target.value }))}
+                />
+              </label>
+
+              {form.camposHabilitados.includes('grupoFemeas') && (
               <label>
                 Grupo de Fêmeas
                 <input
@@ -371,41 +697,60 @@ export default function BioterioPage() {
                   onChange={(e) => setForm((prev) => ({ ...prev, grupoFemeas: e.target.value }))}
                 />
               </label>
+              )}
 
-              <label>
-                Crias
-                <textarea
-                  rows={3}
-                  value={form.crias}
-                  onChange={(e) => setForm((prev) => ({ ...prev, crias: e.target.value }))}
-                />
-              </label>
+              {form.camposHabilitados.includes('idadeFemeas') && (
+                <label>
+                  Idade das Fêmeas
+                  <input
+                    value={form.idadeFemeas}
+                    onChange={(e) => setForm((prev) => ({ ...prev, idadeFemeas: e.target.value }))}
+                  />
+                </label>
+              )}
 
-              <label>
-                Grupo de Machos
-                <input
-                  value={form.machosRotativos}
-                  onChange={(e) => setForm((prev) => ({ ...prev, machosRotativos: e.target.value }))}
-                />
-              </label>
+              {form.camposHabilitados.includes('crias') && (
+                <label>
+                  Crias
+                  <textarea
+                    rows={3}
+                    value={form.crias}
+                    onChange={(e) => setForm((prev) => ({ ...prev, crias: e.target.value }))}
+                  />
+                </label>
+              )}
 
-              <label>
-                Data de Nascimento
-                <input
-                  type="date"
-                  value={form.dataNascimento}
-                  onChange={(e) => setForm((prev) => ({ ...prev, dataNascimento: e.target.value }))}
-                />
-              </label>
+              {form.camposHabilitados.includes('machosRotativos') && (
+                <label>
+                  Grupo de Machos
+                  <input
+                    value={form.machosRotativos}
+                    onChange={(e) => setForm((prev) => ({ ...prev, machosRotativos: e.target.value }))}
+                  />
+                </label>
+              )}
 
-              <label>
-                Data de Desmame
-                <input
-                  type="date"
-                  value={form.dataDesmame}
-                  onChange={(e) => setForm((prev) => ({ ...prev, dataDesmame: e.target.value }))}
-                />
-              </label>
+              {form.camposHabilitados.includes('dataNascimento') && (
+                <label>
+                  Data de Nascimento
+                  <input
+                    type="date"
+                    value={form.dataNascimento}
+                    onChange={(e) => setForm((prev) => ({ ...prev, dataNascimento: e.target.value }))}
+                  />
+                </label>
+              )}
+
+              {form.camposHabilitados.includes('dataDesmame') && (
+                <label>
+                  Data de Desmame
+                  <input
+                    type="date"
+                    value={form.dataDesmame}
+                    onChange={(e) => setForm((prev) => ({ ...prev, dataDesmame: e.target.value }))}
+                  />
+                </label>
+              )}
 
               <div className="modal-actions">
                 <button type="button" className="btn-secondary" onClick={closeModal} disabled={saving}>
