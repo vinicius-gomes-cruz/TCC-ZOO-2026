@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { createHabitat, deleteHabitat, getHabitats, updateHabitat } from '../api'
 
 export interface EnriquecimentoAmbiental {
@@ -15,10 +16,6 @@ export interface Habitat {
   enriquecimentoAmbiental: EnriquecimentoAmbiental[]
 }
 
-interface HabitatPageProps {
-  onOpenHabitat: (habitat: Habitat) => void
-}
-
 const emptyHabitat: Habitat = {
   nome: '',
   descricao: '',
@@ -26,7 +23,8 @@ const emptyHabitat: Habitat = {
   enriquecimentoAmbiental: [],
 }
 
-export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
+export default function HabitatPage() {
+  const navigate = useNavigate()
   const [habitats, setHabitats] = useState<Habitat[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -125,9 +123,14 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
           <h1 className="page-title">Habitats</h1>
           <p className="page-subtitle">Gerencie os habitats do zoológico</p>
         </div>
-        <button className="btn-primary" onClick={openCreate}>
-          + Novo Habitat
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button type="button" className="btn-secondary" onClick={() => navigate('/habitats/anotacoes')}>
+            Ver anotações
+          </button>
+          <button className="btn-primary" onClick={openCreate}>
+            + Novo Habitat
+          </button>
+        </div>
       </div>
 
       {error && <div className="alert-error">{error}</div>}
@@ -148,11 +151,17 @@ export default function HabitatPage({ onOpenHabitat }: HabitatPageProps) {
                 className="habitat-card habitat-card-clickable"
                 role="button"
                 tabIndex={0}
-                onClick={() => onOpenHabitat(h)}
+                onClick={() => {
+                  if (h.id) {
+                    navigate(`/habitats/${h.id}/animais`, { state: { habitat: h } })
+                  }
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    onOpenHabitat(h)
+                    if (h.id) {
+                      navigate(`/habitats/${h.id}/animais`, { state: { habitat: h } })
+                    }
                   }
                 }}
               >

@@ -190,6 +190,11 @@ export type BioterioAnotacaoRequestPayload = {
   texto: string
 }
 
+export type AnotacaoRequestPayload = {
+  dataAnotacao?: string | null
+  texto: string
+}
+
 export type ItemEstoqueRacao = {
   id: number
   nome: string
@@ -269,6 +274,84 @@ export async function updateBioterioAnotacao(id: number, payload: BioterioAnotac
 
 export async function deleteBioterioAnotacao(id: number) {
   const res = await fetch(`${API_BASE}/api/bioterio/anotacoes/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status} - ${res.statusText}`)
+  }
+}
+
+export async function getHabitatAnotacoes(data?: string) {
+  const query = data ? `?data=${encodeURIComponent(data)}` : ''
+  const res = await fetch(`${API_BASE}/api/habitat/anotacoes${query}`, {
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function createHabitatAnotacao(payload: AnotacaoRequestPayload) {
+  const res = await fetch(`${API_BASE}/api/habitat/anotacoes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function updateHabitatAnotacao(id: number, payload: AnotacaoRequestPayload) {
+  const res = await fetch(`${API_BASE}/api/habitat/anotacoes/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function deleteHabitatAnotacao(id: number) {
+  const res = await fetch(`${API_BASE}/api/habitat/anotacoes/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status} - ${res.statusText}`)
+  }
+}
+
+export async function getEstoqueAnotacoes(data?: string) {
+  const query = data ? `?data=${encodeURIComponent(data)}` : ''
+  const res = await fetch(`${API_BASE}/api/estoque/anotacoes${query}`, {
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function createEstoqueAnotacao(payload: AnotacaoRequestPayload) {
+  const res = await fetch(`${API_BASE}/api/estoque/anotacoes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function updateEstoqueAnotacao(id: number, payload: AnotacaoRequestPayload) {
+  const res = await fetch(`${API_BASE}/api/estoque/anotacoes/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
+export async function deleteEstoqueAnotacao(id: number) {
+  const res = await fetch(`${API_BASE}/api/estoque/anotacoes/${id}`, {
     method: 'DELETE',
     credentials: 'include',
   })

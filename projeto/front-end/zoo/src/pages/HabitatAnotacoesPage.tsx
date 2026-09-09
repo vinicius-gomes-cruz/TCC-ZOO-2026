@@ -2,14 +2,14 @@ import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  createBioterioAnotacao,
-  deleteBioterioAnotacao,
-  getBioterioAnotacoes,
-  updateBioterioAnotacao,
+  createHabitatAnotacao,
+  deleteHabitatAnotacao,
+  getHabitatAnotacoes,
+  updateHabitatAnotacao,
 } from '../api'
 import '../styles/BioterioAnotacoesPage.css'
 
-type BioterioAnotacao = {
+type HabitatAnotacao = {
   id: number
   dataAnotacao: string
   texto: string
@@ -36,9 +36,9 @@ function formatarDataHora(dataHoraIso: string | null) {
   return data.toLocaleString('pt-BR')
 }
 
-export default function BioterioAnotacoesPage() {
+export default function HabitatAnotacoesPage() {
   const navigate = useNavigate()
-  const [anotacoes, setAnotacoes] = useState<BioterioAnotacao[]>([])
+  const [anotacoes, setAnotacoes] = useState<HabitatAnotacao[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [savingEdicao, setSavingEdicao] = useState(false)
@@ -56,8 +56,8 @@ export default function BioterioAnotacoesPage() {
     try {
       setLoading(true)
       setError(null)
-      const dataApi = await getBioterioAnotacoes()
-      setAnotacoes(Array.isArray(dataApi) ? (dataApi as BioterioAnotacao[]) : [])
+      const dataApi = await getHabitatAnotacoes()
+      setAnotacoes(Array.isArray(dataApi) ? (dataApi as HabitatAnotacao[]) : [])
     } catch (e) {
       setError(String(e))
     } finally {
@@ -82,7 +82,7 @@ export default function BioterioAnotacoesPage() {
       setSaving(true)
       setError(null)
 
-      await createBioterioAnotacao({
+      await createHabitatAnotacao({
         dataAnotacao: null,
         texto,
       })
@@ -101,7 +101,7 @@ export default function BioterioAnotacoesPage() {
     setFiltroFim('')
   }
 
-  const iniciarEdicao = (anotacao: BioterioAnotacao) => {
+  const iniciarEdicao = (anotacao: HabitatAnotacao) => {
     setEditingId(anotacao.id)
     setEditingTexto(anotacao.texto ?? '')
     setError(null)
@@ -121,7 +121,7 @@ export default function BioterioAnotacoesPage() {
     try {
       setSavingEdicao(true)
       setError(null)
-      await updateBioterioAnotacao(id, {
+      await updateHabitatAnotacao(id, {
         texto: editingTexto,
       })
       cancelarEdicao()
@@ -139,7 +139,7 @@ export default function BioterioAnotacoesPage() {
     try {
       setDeletingId(id)
       setError(null)
-      await deleteBioterioAnotacao(id)
+      await deleteHabitatAnotacao(id)
       if (editingId === id) {
         cancelarEdicao()
       }
@@ -167,7 +167,7 @@ export default function BioterioAnotacoesPage() {
 
   const subtitulo = useMemo(() => {
     if (!filtroInicio && !filtroFim) {
-      return 'Registre informações livres. A data da anotação é preenchida automaticamente ao salvar.'
+      return 'Registre observações gerais dos habitats. A data da anotação é preenchida automaticamente ao salvar.'
     }
 
     if (filtroInicio && filtroFim) {
@@ -185,12 +185,12 @@ export default function BioterioAnotacoesPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Anotações do Biotério</h1>
+          <h1 className="page-title">Anotações de Habitat</h1>
           <p className="page-subtitle">{subtitulo}</p>
         </div>
         <div className="page-actions">
-          <button type="button" className="btn-secondary" onClick={() => navigate('/bioterio')}>
-            ← Voltar para Biotério
+          <button type="button" className="btn-secondary" onClick={() => navigate('/habitats')}>
+            ← Voltar para Habitats
           </button>
         </div>
       </div>
@@ -207,7 +207,7 @@ export default function BioterioAnotacoesPage() {
               rows={10}
               value={form.texto}
               onChange={(e) => setForm((prev) => ({ ...prev, texto: e.target.value }))}
-              placeholder="Ex: Verificar caixa 12 após limpeza da manhã..."
+              placeholder="Ex: Revisar enriquecimento do habitat das aves no turno da tarde..."
               style={{ display: 'block', width: '100%', minHeight: 320 }}
             />
           </label>

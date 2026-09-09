@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { adicionarPacotesEstoque, criarItemEstoque, deletarItemEstoque, finalizarRacaoNoBioterio, listarItensEstoque, listarRacoesNoBioterio, type ItemEstoqueRacao } from '../api'
 
 type TipoEstoque = 'ALIMENTO' | 'MATERIAL' | 'RACAO'
@@ -22,6 +23,7 @@ const tabOptions: Array<{ value: TipoEstoque; label: string }> = [
 ]
 
 export default function EstoquePage() {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<TipoEstoque>('ALIMENTO')
   const [showForm, setShowForm] = useState(false)
   const [itens, setItens] = useState<ItemEstoque[]>([])
@@ -190,13 +192,18 @@ export default function EstoquePage() {
           <h1 className="page-title">Estoque</h1>
           <p className="page-subtitle">Registre tudo que chega no estoque em uma lista corrida</p>
         </div>
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={() => setShowForm(true)}
-        >
-          + Novo registro
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button type="button" className="btn-secondary" onClick={() => navigate('/estoque/anotacoes')}>
+            Ver anotações
+          </button>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => setShowForm(true)}
+          >
+            + Novo registro
+          </button>
+        </div>
       </div>
 
       <div className="estoque-tabs">

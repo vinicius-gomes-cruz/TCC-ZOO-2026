@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   createAnimal,
   createCaixa,
@@ -16,7 +17,6 @@ import {
   type CaixaRequestPayload,
   type ItemEstoqueRacao,
 } from '../api'
-import BioterioAnotacoesPage from './BioterioAnotacoesPage'
 
 type AnimalDaCaixa = {
   id: number
@@ -81,7 +81,7 @@ const parseCamposBioterio = (camposBioterio?: string | null): CampoCaixa[] => {
 }
 
 export default function BioterioPage() {
-  const [telaInterna, setTelaInterna] = useState<'caixas' | 'anotacoes'>('caixas')
+  const navigate = useNavigate()
   const [caixas, setCaixas] = useState<Caixa[]>([])
   const [animais, setAnimais] = useState<AnimalResumo[]>([])
   const [loading, setLoading] = useState(false)
@@ -388,10 +388,6 @@ export default function BioterioPage() {
       })
     : []
 
-  if (telaInterna === 'anotacoes') {
-    return <BioterioAnotacoesPage onVoltar={() => setTelaInterna('caixas')} />
-  }
-
   return (
     <div className="page">
       <div className="page-header">
@@ -400,7 +396,7 @@ export default function BioterioPage() {
           <p className="page-subtitle">Gerencie as caixas do biotério</p>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <button className="btn-secondary" onClick={() => setTelaInterna('anotacoes')}>
+          <button type="button" className="btn-secondary" onClick={() => navigate('/bioterio/anotacoes')}>
             Ver anotações
           </button>
           <button className="btn-primary" onClick={handleCreateCaixaDireto} disabled={saving}>

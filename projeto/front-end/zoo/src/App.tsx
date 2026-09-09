@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react'
+import { Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import './App.css'
 import HabitatPage, { type Habitat } from './pages/HabitatPage'
 import HabitatAnimalsPage from './pages/HabitatAnimalsPage'
 import BioterioPage from './pages/BioterioPage'
 import EstoquePage from './pages/EstoquePage'
+import BioterioAnotacoesPage from './pages/BioterioAnotacoesPage'
+import HabitatAnotacoesPage from './pages/HabitatAnotacoesPage'
+import EstoqueAnotacoesPage from './pages/EstoqueAnotacoesPage'
 import LoginPage from './pages/LoginPage'
 import UsuariosPage from './pages/UsuariosPage'
-import { logout, obterUsuarioAutenticado, type UsuarioAutenticadoResponse } from './api'
+import { getHabitats, logout, obterUsuarioAutenticado, type UsuarioAutenticadoResponse } from './api'
 
-type Page = 'habitats' | 'habitat-animals' | 'bioterio' | 'estoque' | 'usuarios'
 type UsuarioLogado = { nome: string; usuario: string; perfil: UsuarioAutenticadoResponse['perfil'] }
 
 function isUsuarioAutenticadoResponse(value: unknown): value is UsuarioAutenticadoResponse {
@@ -22,12 +25,170 @@ function isUsuarioAutenticadoResponse(value: unknown): value is UsuarioAutentica
   )
 }
 
+function MainLayout({ usuarioLogado, onLogout }: { usuarioLogado: UsuarioLogado; onLogout: () => void }) {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const isAdmin = usuarioLogado.perfil === 'ADMINISTRADOR'
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [location.pathname])
+
+  const formatarPerfil = (perfil: UsuarioLogado['perfil']) => {
+    if (perfil === 'ADMINISTRADOR') return 'Administrador'
+    if (perfil === 'FUNCIONARIO') return 'Funcionário'
+    return perfil
+  }
+
+  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(`${path}/`)
+
+  return (
+    <div className="layout">
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <span className="logo-paw">🐾</span>
+          <span className="logo-text">
+            <span className="logo-zoo">Zoo</span>Gestor
+          </span>
+          <button
+            className="menu-toggle"
+            aria-label="Abrir menu"
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen((open) => !open)}
+          >
+            {mobileMenuOpen ? '✕' : '☰'}
+          </button>
+        </div>
+
+        <nav className={`sidebar-nav ${mobileMenuOpen ? 'open' : ''}`}>
+          <button
+            className={`nav-item ${isActive('/habitats') ? 'active' : ''}`}
+            onClick={() => navigate('/habitats')}
+          >
+            <span className="nav-icon">🌿</span>
+            Habitats
+          </button>
+          <button
+            className={`nav-item ${isActive('/bioterio') ? 'active' : ''}`}
+            onClick={() => navigate('/bioterio')}
+          >
+            <span className="nav-icon">🧬</span>
+            Bioterio
+          </button>
+          <button
+            className={`nav-item ${isActive('/estoque') ? 'active' : ''}`}
+            onClick={() => navigate('/estoque')}
+          >
+            <span className="nav-icon">📦</span>
+            Estoque
+          </button>
+          {isAdmin && (
+            <button
+              className={`nav-item ${isActive('/usuarios') ? 'active' : ''}`}
+              onClick={() => navigate('/usuarios')}
+            >
+              <span className="nav-icon">👤</span>
+              Usuários
+            </button>
+          )}
+        </nav>
+
+        <div className={`sidebar-footer ${mobileMenuOpen ? 'open' : ''}`}>
+          <button className="nav-item nav-item-logout" onClick={onLogout}>
+            <span className="nav-icon">🚪</span>
+            Sair
+          </button>
+        </div>
+      </aside>
+
+      <div className="main-wrapper">
+        <header className="topbar">
+          <nav className="topbar-nav" />
+
+          <div className="topbar-right">
+            <div className="user-badge">
+              <span className="user-name">{usuarioLogado.nome}</span>
+              <span className="user-profile">{formatarPerfil(usuarioLogado.perfil)}</span>
+            </div>
+          </div>
+        </header>
+
+        <main className="content">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  )
+}
+
+function HabitatAnimalsRoute() {
+  const navigate = useNavigate()
+  const params = useParams()
+  const location = useLocation()
+  const [habitat, setHabitat] = useState<Habitat | null>((location.state as { habitat?: Habitat } | null)?.habitat ?? null)
+  const [loading, setLoading] = useState(!habitat)
+
+  useEffect(() => {
+    const habitatState = (location.state as { habitat?: Habitat } | null)?.habitat ?? null
+    if (habitatState?.id && String(habitatState.id) === params.habitatId) {
+      setHabitat(habitatState)
+      setLoading(false)
+      return
+    }
+
+    const habitatId = Number(params.habitatId)
+    if (!Number.isFinite(habitatId)) {
+      setHabitat(null)
+      setLoading(false)
+      return
+    }
+
+    let ativo = true
+    setLoading(true)
+
+    void getHabitats()
+      .then((list) => {
+        if (!ativo) return
+        const lista = Array.isArray(list) ? (list as Habitat[]) : []
+        const encontrado = lista.find((item) => item.id === habitatId) ?? null
+        setHabitat(encontrado)
+      })
+      .catch(() => {
+        if (ativo) setHabitat(null)
+      })
+      .finally(() => {
+        if (ativo) setLoading(false)
+      })
+
+    return () => {
+      ativo = false
+    }
+  }, [location.state, params.habitatId])
+
+  if (loading) {
+    return <div className="loading">Carregando habitat...</div>
+  }
+
+  if (!habitat) {
+    return (
+      <div className="empty-state">
+        <div className="empty-state-icon">🌿</div>
+        <p>Habitat não encontrado.</p>
+        <button type="button" className="btn-primary" onClick={() => navigate('/habitats')}>
+          Voltar para Habitats
+        </button>
+      </div>
+    )
+  }
+
+  return <HabitatAnimalsPage habitat={habitat} onBack={() => navigate('/habitats')} />
+}
+
 function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('habitats')
-  const [selectedHabitat, setSelectedHabitat] = useState<Habitat | null>(null)
   const [usuarioLogado, setUsuarioLogado] = useState<UsuarioLogado | null>(null)
   const [carregandoSessao, setCarregandoSessao] = useState(true)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const restaurarSessao = async () => {
@@ -60,19 +221,13 @@ function App() {
       usuario: usuario.usuario,
       perfil: usuario.perfil,
     })
-  }
-
-  const formatarPerfil = (perfil: UsuarioLogado['perfil']) => {
-    if (perfil === 'ADMINISTRADOR') return 'Administrador'
-    if (perfil === 'FUNCIONARIO') return 'Funcionário'
-    return perfil
+    navigate('/habitats', { replace: true })
   }
 
   const handleLogout = () => {
     void logout()
     setUsuarioLogado(null)
-    setCurrentPage('habitats')
-    setSelectedHabitat(null)
+    navigate('/login', { replace: true })
   }
 
   if (carregandoSessao) {
@@ -89,109 +244,22 @@ function App() {
     return <LoginPage onLogin={handleLogin} />
   }
 
-  const isAdmin = usuarioLogado.perfil === 'ADMINISTRADOR'
-
-  const openHabitatAnimals = (habitat: Habitat) => {
-    setSelectedHabitat(habitat)
-    setCurrentPage('habitat-animals')
-  }
-
-  const backToHabitats = () => {
-    setCurrentPage('habitats')
-  }
-
   return (
-    <div className="layout">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="sidebar-logo">
-          <span className="logo-paw">🐾</span>
-          <span className="logo-text">
-            <span className="logo-zoo">Zoo</span>Gestor
-          </span>
-          <button
-            className="menu-toggle"
-            aria-label="Abrir menu"
-            aria-expanded={mobileMenuOpen}
-            onClick={() => setMobileMenuOpen((open) => !open)}
-          >
-            {mobileMenuOpen ? '✕' : '☰'}
-          </button>
-        </div>
-
-        <nav className={`sidebar-nav ${mobileMenuOpen ? 'open' : ''}`}>
-          <button
-            className={`nav-item ${currentPage === 'habitats' ? 'active' : ''}`}
-            onClick={() => { setCurrentPage('habitats'); setMobileMenuOpen(false) }}
-          >
-            <span className="nav-icon">🌿</span>
-            Habitats
-          </button>
-          <button
-            className={`nav-item ${currentPage === 'bioterio' ? 'active' : ''}`}
-            onClick={() => { setCurrentPage('bioterio'); setMobileMenuOpen(false) }}
-          >
-            <span className="nav-icon">🧬</span>
-            Bioterio
-          </button>
-          <button
-            className={`nav-item ${currentPage === 'estoque' ? 'active' : ''}`}
-            onClick={() => { setCurrentPage('estoque'); setMobileMenuOpen(false) }}
-          >
-            <span className="nav-icon">📦</span>
-            Estoque
-          </button>
-          {isAdmin && (
-            <button
-              className={`nav-item ${currentPage === 'usuarios' ? 'active' : ''}`}
-              onClick={() => { setCurrentPage('usuarios'); setMobileMenuOpen(false) }}
-            >
-              <span className="nav-icon">👤</span>
-              Usuários
-            </button>
-          )}
-        </nav>
-
-        <div className={`sidebar-footer ${mobileMenuOpen ? 'open' : ''}`}>
-          <button className="nav-item nav-item-logout" onClick={() => { handleLogout(); setMobileMenuOpen(false) }}>
-            <span className="nav-icon">🚪</span>
-            Sair
-          </button>
-        </div>
-      </aside>
-
-      {/* Right side */}
-      <div className="main-wrapper">
-        {/* Top bar */}
-        <header className="topbar">
-          <nav className="topbar-nav">
-            {currentPage === 'habitat-animals' && selectedHabitat && (
-              <button className="topbar-tab active" disabled>
-                {selectedHabitat.nome}
-              </button>
-            )}
-          </nav>
-
-          <div className="topbar-right">
-            <div className="user-badge">
-              <span className="user-name">{usuarioLogado.nome}</span>
-              <span className="user-profile">{formatarPerfil(usuarioLogado.perfil)}</span>
-            </div>
-          </div>
-        </header>
-
-        {/* Page content */}
-        <main className="content">
-          {currentPage === 'habitats' && <HabitatPage onOpenHabitat={openHabitatAnimals} />}
-          {currentPage === 'habitat-animals' && selectedHabitat && (
-            <HabitatAnimalsPage habitat={selectedHabitat} onBack={backToHabitats} />
-          )}
-          {currentPage === 'bioterio' && <BioterioPage />}
-          {currentPage === 'estoque' && <EstoquePage />}
-          {currentPage === 'usuarios' && isAdmin && <UsuariosPage />}
-        </main>
-      </div>
-    </div>
+    <Routes>
+      <Route path="/login" element={<Navigate to="/habitats" replace />} />
+      <Route element={<MainLayout usuarioLogado={usuarioLogado} onLogout={handleLogout} />}>
+        <Route path="/" element={<Navigate to="/habitats" replace />} />
+        <Route path="/habitats" element={<HabitatPage />} />
+        <Route path="/habitats/anotacoes" element={<HabitatAnotacoesPage />} />
+        <Route path="/habitats/:habitatId/animais" element={<HabitatAnimalsRoute />} />
+        <Route path="/bioterio" element={<BioterioPage />} />
+        <Route path="/bioterio/anotacoes" element={<BioterioAnotacoesPage />} />
+        <Route path="/estoque" element={<EstoquePage />} />
+        <Route path="/estoque/anotacoes" element={<EstoqueAnotacoesPage />} />
+        {usuarioLogado.perfil === 'ADMINISTRADOR' && <Route path="/usuarios" element={<UsuariosPage />} />}
+        <Route path="*" element={<Navigate to="/habitats" replace />} />
+      </Route>
+    </Routes>
   )
 }
 
