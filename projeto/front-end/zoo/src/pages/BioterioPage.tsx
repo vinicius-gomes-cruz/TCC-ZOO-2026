@@ -8,7 +8,7 @@ import {
   deleteCaixa,
   enviarRacaoParaBioterio,
   finalizarRacaoNoBioterio,
-  getAnimais,
+  getAnimaisBioterio,
   getCaixas,
   listarRacoesDisponiveis,
   listarRacoesNoBioterio,
@@ -40,7 +40,6 @@ type Caixa = {
 
 type CampoCaixa =
   | 'grupoFemeas'
-  | 'idadeFemeas'
   | 'machosRotativos'
   | 'crias'
   | 'dataNascimento'
@@ -48,7 +47,6 @@ type CampoCaixa =
 
 const OPCOES_CAMPOS: Array<{ key: CampoCaixa; label: string }> = [
   { key: 'grupoFemeas', label: 'Grupo de Fêmeas' },
-  { key: 'idadeFemeas', label: 'Idade das Fêmeas' },
   { key: 'machosRotativos', label: 'Grupo de Machos' },
   { key: 'crias', label: 'Crias' },
   { key: 'dataNascimento', label: 'Data de Nascimento' },
@@ -129,7 +127,7 @@ export default function BioterioPage() {
       .then((list) => setRacoesNoBioterio(Array.isArray(list) ? list : []))
       .catch(() => setRacoesNoBioterio([]))
 
-    getAnimais()
+    getAnimaisBioterio()
       .then((list) => {
         const animaisLista = Array.isArray(list) ? list : []
         const animaisOrdenados = animaisLista
@@ -675,7 +673,7 @@ export default function BioterioPage() {
               </label>
 
               <label>
-                Número da caixa (opcional)
+                Número da caixa
                 <input
                   type="number"
                   min="1"
@@ -693,16 +691,6 @@ export default function BioterioPage() {
                   onChange={(e) => setForm((prev) => ({ ...prev, grupoFemeas: e.target.value }))}
                 />
               </label>
-              )}
-
-              {form.camposHabilitados.includes('idadeFemeas') && (
-                <label>
-                  Idade das Fêmeas
-                  <input
-                    value={form.idadeFemeas}
-                    onChange={(e) => setForm((prev) => ({ ...prev, idadeFemeas: e.target.value }))}
-                  />
-                </label>
               )}
 
               {form.camposHabilitados.includes('crias') && (

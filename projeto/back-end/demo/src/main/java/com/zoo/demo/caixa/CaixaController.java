@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.zoo.demo.animal.Animal;
 import com.zoo.demo.animal.AnimalRepository;
@@ -43,7 +44,6 @@ public class CaixaController {
     @PostMapping
     public ResponseEntity<Caixa> create(@RequestBody CaixaRequest request) {
         Caixa caixa = new Caixa();
-        caixa.setNumeroCaixa(request.getNumeroCaixa() != null ? request.getNumeroCaixa() : proximoNumeroCaixaDisponivel());
         caixa.setGrupoFemeas(request.getGrupoFemeas());
         caixa.setIdadeFemeas(request.getIdadeFemeas());
         caixa.setCrias(request.getCrias());
@@ -59,14 +59,25 @@ public class CaixaController {
             caixa.setAnimal(null);
         }
 
+        caixa.setNumeroCaixa(request.getNumeroCaixa() != null ? request.getNumeroCaixa()
+                : proximoNumeroCaixaDisponivel(request.getAnimalId()));
+
         Caixa saved = repository.save(caixa);
         return ResponseEntity.created(URI.create("/api/caixas/" + saved.getId())).body(saved);
     }
 
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<Caixa> update(@PathVariable Long id, @RequestBody CaixaRequest request) {
         return repository.findById(id)
                 .map(existing -> {
+                    Animal animal = request.getAnimalId() != null
+                            ? animalRepository.findById(request.getAnimalId())
+                                    .orElseThrow(() -> new RuntimeException("Animal não encontrado: " + request.getAnimalId()))
+                            : null;
+
+                    trocarNumeroCaixaQuandoNecessario(existing, animal, request.getNumeroCaixa());
+
                     if (request.getNumeroCaixa() != null) {
                         existing.setNumeroCaixa(request.getNumeroCaixa());
                     }
@@ -77,9 +88,7 @@ public class CaixaController {
                     existing.setDataNascimento(request.getDataNascimento());
                     existing.setDataDesmame(request.getDataDesmame());
 
-                    if (request.getAnimalId() != null) {
-                        Animal animal = animalRepository.findById(request.getAnimalId())
-                                .orElseThrow(() -> new RuntimeException("Animal não encontrado: " + request.getAnimalId()));
+                    if (animal != null) {
                         existing.setAnimal(animal);
                     } else {
                         existing.setAnimal(null);
@@ -90,8 +99,24 @@ public class CaixaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    private Integer proximoNumeroCaixaDisponivel() {
-        List<Caixa> caixas = repository.findAllByOrderByNumeroCaixaAsc();
+    private void trocarNumeroCaixaQuandoNecessario(Caixa caixaEditada, Animal animal, Integer numeroDesejado) {
+        if (animal == null || numeroDesejado == null || caixaEditada.getAnimal() == null
+                || !animal.getId().equals(caixaEditada.getAnimal().getId())) {
+            return;
+        }
+
+        repository.findByAnimalIdAndNumeroCaixa(animal.getId(), numeroDesejado)
+                .filter(caixa -> !caixa.getId().equals(caixaEditada.getId()))
+                .ifPresent(caixaDestino -> {
+                    Integer numeroOriginal = caixaEditada.getNumeroCaixa();
+                    caixaDestino.setNumeroCaixa(-caixaDestino.getId().intValue());
+                    repository.saveAndFlush(caixaDestino);
+                    caixaDestino.setNumeroCaixa(numeroOriginal);
+                });
+    }
+
+    private Integer proximoNumeroCaixaDisponivel(Long animalId) {
+        List<Caixa> caixas = repository.findByAnimalIdOrderByNumeroCaixaAsc(animalId);
         int proximo = 1;
 
         for (Caixa caixa : caixas) {

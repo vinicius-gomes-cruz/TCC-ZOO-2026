@@ -375,6 +375,13 @@ export async function getAnimais(): Promise<AnimalResumo[]> {
   return handleResponse(res)
 }
 
+export async function getAnimaisBioterio(): Promise<AnimalResumo[]> {
+  const res = await fetch(`${API_BASE}/api/animais/bioterio`, {
+    credentials: 'include',
+  })
+  return handleResponse(res)
+}
+
 export async function updateCamposBioterioAnimal(animalId: number, camposBioterio: string): Promise<AnimalResumo> {
   const res = await fetch(`${API_BASE}/api/animais/${animalId}/campos-bioterio`, {
     method: 'PATCH',

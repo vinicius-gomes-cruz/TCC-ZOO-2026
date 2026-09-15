@@ -7,4 +7,6 @@ import java.util.List;
 public interface AnimalRepository extends JpaRepository<Animal, Long> {
 
     List<Animal> findByHabitatId(Long habitatId);
+
+    List<Animal> findByHabitatIsNullAndCamposBioterioIsNotNull();
 }

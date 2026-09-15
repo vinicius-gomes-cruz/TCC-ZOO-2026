@@ -46,6 +46,11 @@ public class AnimalController {
         return animalRepository.findByHabitatId(habitatId);
     }
 
+    @GetMapping("/bioterio")
+    public List<Animal> bioterio() {
+        return animalRepository.findByHabitatIsNullAndCamposBioterioIsNotNull();
+    }
+
     @PostMapping
     public ResponseEntity<Animal> create(@RequestBody AnimalRequest request) {
         Animal animal = new Animal();
