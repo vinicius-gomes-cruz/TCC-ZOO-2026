@@ -8,11 +8,13 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+
   server: {
     host: '0.0.0.0',
+
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://zoogestor.api.cascavel.ifpr.edu.br',
         changeOrigin: true,
         secure: false,
       }
