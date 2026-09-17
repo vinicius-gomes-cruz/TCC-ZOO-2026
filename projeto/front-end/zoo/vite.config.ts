@@ -14,7 +14,7 @@ export default defineConfig({
 
     proxy: {
       '/api': {
-        target: 'http://zoogestor.api.apps.cascavel.ifpr.edu.br',
+        target: process.env.VITE_API_URL || 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
       }
