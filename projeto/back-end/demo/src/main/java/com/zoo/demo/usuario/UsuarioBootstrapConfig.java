@@ -12,9 +12,9 @@ public class UsuarioBootstrapConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(UsuarioBootstrapConfig.class);
 
     @Bean
-        CommandLineRunner criarAdministradorPadrao(
-        UsuarioRepository usuarioRepository,
-        UsuarioAuthService usuarioAuthService) {
+    CommandLineRunner criarAdministradorPadrao(
+    UsuarioRepository usuarioRepository,
+    UsuarioAuthService usuarioAuthService) {
 
     return args -> {
 
