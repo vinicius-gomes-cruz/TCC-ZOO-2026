@@ -14,7 +14,7 @@ export default defineConfig({
 
     proxy: {
       '/api': {
-        target: 'http://zoogestor.api.cascavel.ifpr.edu.br',
+        target: 'http://zoogestor.api.apps.cascavel.ifpr.edu.br',
         changeOrigin: true,
         secure: false,
       }
