@@ -120,6 +120,7 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
   const [animals, setAnimals] = useState<Animal[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [showAnimalModal, setShowAnimalModal] = useState(false)
   const [form, setForm] = useState<Animal>(emptyAnimal)
   const [editingAnimalId, setEditingAnimalId] = useState<number | null>(null)
@@ -146,6 +147,22 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
   }
 
   useEffect(load, [habitat.id])
+
+  // Auto-limpar mensagem de sucesso após 3 segundos
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [success])
+
+  // Auto-limpar mensagem de erro após 5 segundos
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [error])
 
   const loadAlimentacoes = async (habitatId: number) => {
     try {
@@ -181,8 +198,10 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
 
       if (editingAnimalId) {
         await updateAnimal(editingAnimalId, payload)
+        setSuccess('Animal atualizado com sucesso!')
       } else {
         await createAnimal(payload)
+        setSuccess('Animal cadastrado com sucesso!')
       }
       setShowAnimalModal(false)
       setForm(emptyAnimal)
@@ -224,6 +243,7 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
     if (!animalId || !window.confirm('Deseja remover este animal?')) return
     try {
       await deleteAnimal(animalId)
+      setSuccess('Animal removido com sucesso!')
       load()
     } catch (e) {
       setError(String(e))
@@ -289,21 +309,39 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
           nome: semanaAlimentacaoForm[value].trim(),
         }))
         .filter((item) => item.nome.length > 0)
-      if (itensSemana.length === 0) {
-        setError('Preencha ao menos um dia da semana')
-        setSaving(false)
-        return
-      }
 
       const cardapioName = (cardapioForm.cardapio || '').trim() || 'Cardápio Semanal'
       
       // Detectar se é edição de cardápio existente
       const isEditingExistingCardapio = nomesCardapios.includes(cardapioName)
 
-      if (isEditingExistingCardapio) {
-        // Modo edição: atualizar alimentações existentes
-        await Promise.all(
-          itensSemana.map((item) => {
+      // Se nenhum dia foi preenchido
+      if (itensSemana.length === 0) {
+        // Se é edição, deletar o cardápio inteiro
+        if (isEditingExistingCardapio) {
+          // Deletar todas as alimentações deste cardápio
+          const alimentacoesDoCardapio = alimentacoes.filter(
+            (a) => (a.cardapio || 'Cardápio Semanal').trim() === cardapioName.trim()
+          )
+          
+          await Promise.all(
+            alimentacoesDoCardapio.map((alimentacao) => deletarAlimentacao(alimentacao.id))
+          )
+          
+          setSuccess('Cardápio excluído com sucesso!')
+        } else {
+          // Se é novo cardápio, não permitir vazio
+          setError('Preencha ao menos um dia da semana')
+          setSaving(false)
+          return
+        }
+      } else {
+        // Modo edição: atualizar alimentações existentes e deletar as que ficaram vazias
+        const operacoes = []
+        
+        // Atualizar ou criar alimentações preenchidas
+        operacoes.push(
+          ...itensSemana.map((item) => {
             const alimentacaoId = alimentacaoIdsPorDia[item.diaSemana as DiaSemana]
             if (alimentacaoId) {
               // Atualizar alimentação existente
@@ -322,31 +360,27 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
             }
           })
         )
-      } else {
-        // Modo criação: validar duplicatas e criar novas alimentações
-        const duplicates = itensSemana.filter((item) =>
-          alimentacoes.some((a) => (a.cardapio || 'Cardápio Semanal').trim() === cardapioName && (a.diaSemana || '').trim() === item.diaSemana)
-        )
-
-        if (duplicates.length > 0) {
-          setError('Já existe alimentação cadastrada para pelo menos um dia selecionado neste cardápio')
-          setSaving(false)
-          return
-        }
-
-        await Promise.all(
-          itensSemana.map((item) =>
-            criarAlimentacaoPorHabitat(habitatId, {
-              cardapio: cardapioName,
-              diaSemana: item.diaSemana,
-              nome: item.nome,
-            })
-          )
-        )
+        
+        // Deletar alimentações que existiam mas foram deixadas em branco
+        diasSemanaOptions.forEach((option) => {
+          const alimentacaoId = alimentacaoIdsPorDia[option.value as DiaSemana]
+          const novoValor = semanaAlimentacaoForm[option.value as DiaSemana].trim()
+          
+          // Se tinha alimentação antes e agora está vazia, deletar
+          if (alimentacaoId && novoValor.length === 0) {
+            operacoes.push(deletarAlimentacao(alimentacaoId))
+          }
+        })
+        
+        await Promise.all(operacoes)
+        setSuccess('Cardápio atualizado com sucesso!')
       }
 
       await loadAlimentacoes(habitatId)
       setCardapioSelecionado(cardapioName)
+      
+      const isEditing = isEditingExistingCardapio
+      setSuccess(isEditing ? 'Cardápio atualizado com sucesso!' : 'Cardápio criado com sucesso!')
 
       setShowCardapioModal(false)
       setCardapioForm(emptyCardapioForm)
@@ -484,6 +518,7 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
       </div>
 
       {showPageError && <div className="alert-error">{error}</div>}
+      {success && <div className="alert-success">{success}</div>}
 
       {loading ? (
         <div className="loading">Carregando animais...</div>
@@ -555,9 +590,9 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
                   className="btn-primary"
                   onClick={openCreateCardapio}
                   disabled={!habitat.id}
-                  title={habitat.id ? 'Adicionar novo item' : 'Habitat inválido'}
+                  title={habitat.id ? 'Gerenciar cardápios' : 'Habitat inválido'}
                 >
-                  + Novo Item
+                  ⚙️ Gerenciar Cardápios
                 </button>
               </div>
 
@@ -734,7 +769,7 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
         <div className="modal-overlay" onClick={() => setShowCardapioModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Novo Item do Cardápio</h2>
+              <h2>Gerenciar Cardápios</h2>
               <button className="modal-close" onClick={() => setShowCardapioModal(false)}>
                 ✕
               </button>

@@ -2,6 +2,41 @@ export const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
 export type PerfilUsuario = 'ADMINISTRADOR' | 'FUNCIONARIO'
 
+// Mapear códigos de erro HTTP para mensagens amigáveis
+const formatErrorMessage = (status: number, statusText: string, text: string): string => {
+  if (status === 400) {
+    return text || 'Dados inválidos. Verifique as informações e tente novamente.'
+  }
+  if (status === 401) {
+    return 'Sessão expirada. Faça login novamente.'
+  }
+  if (status === 403) {
+    return 'Acesso negado. Você não tem permissão para realizar esta ação.'
+  }
+  if (status === 404) {
+    return 'Recurso não encontrado.'
+  }
+  if (status === 409) {
+    return text || 'Conflito. O recurso já existe ou há dados conflitantes.'
+  }
+  if (status === 500) {
+    return 'Erro no servidor. Tente novamente mais tarde.'
+  }
+  if (status === 501) {
+    return 'Erro no servidor. Tente novamente mais tarde.'
+  }
+  if (status === 503) {
+    return 'Serviço indisponível. Tente novamente mais tarde.'
+  }
+  if (status >= 500) {
+    return 'Erro no servidor. Tente novamente mais tarde.'
+  }
+  if (status >= 400) {
+    return text || `Erro ao processar a solicitação. (Erro ${status})`
+  }
+  return text || 'Erro desconhecido. Tente novamente.'
+}
+
 export type UsuarioLoginResponse = {
   accessToken: string
   refreshToken: string
@@ -37,7 +72,8 @@ export type UsuarioSistemaRequest = {
 async function handleResponse(res: Response) {
   if (!res.ok) {
     const text = await res.text().catch(() => '')
-    throw new Error(`HTTP ${res.status} - ${res.statusText}${text ? `: ${text}` : ''}`)
+    const message = formatErrorMessage(res.status, res.statusText, text)
+    throw new Error(message)
   }
 
   if (res.status === 204) return null

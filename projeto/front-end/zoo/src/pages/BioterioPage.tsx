@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -80,11 +80,13 @@ const parseCamposBioterio = (camposBioterio?: string | null): CampoCaixa[] => {
 
 export default function BioterioPage() {
   const navigate = useNavigate()
+  const tableContainerRef = useRef<HTMLDivElement>(null)
   const [caixas, setCaixas] = useState<Caixa[]>([])
   const [animais, setAnimais] = useState<AnimalResumo[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [editingCaixa, setEditingCaixa] = useState<Caixa | null>(null)
   const [racoesDisponiveis, setRacoesDisponiveis] = useState<ItemEstoqueRacao[]>([])
@@ -147,6 +149,22 @@ export default function BioterioPage() {
 
   useEffect(load, [])
 
+  // Auto-limpar mensagem de sucesso após 3 segundos
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [success])
+
+  // Auto-limpar mensagem de erro após 5 segundos
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [error])
+
   const handleCreateCaixaDireto = async () => {
     if (!animalFiltroId) {
       setError('Selecione um animal antes de criar a caixa.')
@@ -157,7 +175,15 @@ export default function BioterioPage() {
       setSaving(true)
       setError(null)
       await createCaixa({ animalId: Number(animalFiltroId) })
+      setSuccess('Caixa criada com sucesso!')
       load()
+      
+      // Scroll automático para o final da página após um pequeno delay
+      setTimeout(() => {
+        if (tableContainerRef.current) {
+          tableContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+        }
+      }, 100)
     } catch (e) {
       setError(String(e))
     } finally {
@@ -172,6 +198,7 @@ export default function BioterioPage() {
       setSaving(true)
       setError(null)
       await deleteCaixa(caixa.id)
+      setSuccess('Caixa excluída com sucesso!')
       load()
     } catch (e) {
       setError(String(e))
@@ -401,6 +428,7 @@ export default function BioterioPage() {
       </div>
 
       {error && <div className="alert-error">{error}</div>}
+      {success && <div className="alert-success">{success}</div>}
 
       <div className="table-container" style={{ marginBottom: 16, padding: 16 }}>
         <h2 className="section-title" style={{ marginTop: 0 }}>Ração no biotério</h2>
@@ -544,7 +572,7 @@ export default function BioterioPage() {
         </div>
       ) : (
         <>
-        <div className="table-container">
+        <div className="table-container" ref={tableContainerRef}>
         <table className="table">
           <thead>
             <tr>
