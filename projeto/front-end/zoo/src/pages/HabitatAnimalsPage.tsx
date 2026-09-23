@@ -61,7 +61,7 @@ const diaSemanaOrdem: Record<DiaSemana, number> = {
 }
 
 const emptyCardapioForm = {
-  cardapio: 'Cardápio Semanal',
+  cardapio: '',
 }
 
 const emptySemanaAlimentacao: Record<DiaSemana, string> = {
@@ -131,6 +131,9 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
   const [semanaAlimentacaoForm, setSemanaAlimentacaoForm] = useState<Record<DiaSemana, string>>(emptySemanaAlimentacao)
   const [openMenuId, setOpenMenuId] = useState<number | null>(null)
   const [cardapioSelecionado, setCardapioSelecionado] = useState<string>('TODOS')
+  const [alimentacaoIdsPorDia, setAlimentacaoIdsPorDia] = useState<Record<DiaSemana, number | null>>(
+    Object.fromEntries(diasSemanaOptions.map((d) => [d.value, null])) as Record<DiaSemana, number | null>
+  )
 
   const load = () => {
     if (!habitat.id) return
@@ -238,6 +241,38 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
     setShowCardapioModal(true)
   }
 
+  const handleCardapioChange = (selectedCardapio: string) => {
+    setCardapioForm({ ...cardapioForm, cardapio: selectedCardapio })
+    
+    // Se selecionou um cardápio existente, puxar as alimentações
+    if (selectedCardapio && nomesCardapios.includes(selectedCardapio)) {
+      const alimentacoesDoCardapio = alimentacoes.filter(
+        (a) => (a.cardapio || 'Cardápio Semanal').trim() === selectedCardapio.trim()
+      )
+      
+      const novaFormaSemana = { ...emptySemanaAlimentacao }
+      const novoAlimentacaoIds: Record<DiaSemana, number | null> = Object.fromEntries(
+        diasSemanaOptions.map((d) => [d.value, null])
+      ) as Record<DiaSemana, number | null>
+      
+      alimentacoesDoCardapio.forEach((alimentacao) => {
+        if (alimentacao.diaSemana) {
+          novaFormaSemana[alimentacao.diaSemana as DiaSemana] = alimentacao.nome
+          novoAlimentacaoIds[alimentacao.diaSemana as DiaSemana] = alimentacao.id
+        }
+      })
+      
+      setSemanaAlimentacaoForm(novaFormaSemana)
+      setAlimentacaoIdsPorDia(novoAlimentacaoIds)
+    } else {
+      // Se é novo cardápio, limpar os campos
+      setSemanaAlimentacaoForm(emptySemanaAlimentacao)
+      setAlimentacaoIdsPorDia(
+        Object.fromEntries(diasSemanaOptions.map((d) => [d.value, null])) as Record<DiaSemana, number | null>
+      )
+    }
+  }
+
   const handleSubmitCardapio = async (e: React.FormEvent) => {
     e.preventDefault()
     const habitatId = habitat.id
@@ -260,34 +295,65 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
         return
       }
 
-      // validate duplicates against existing alimentacoes in this habitat
       const cardapioName = (cardapioForm.cardapio || '').trim() || 'Cardápio Semanal'
-      const duplicates = itensSemana.filter((item) =>
-        alimentacoes.some((a) => (a.cardapio || 'Cardápio Semanal').trim() === cardapioName && (a.diaSemana || '').trim() === item.diaSemana)
-      )
+      
+      // Detectar se é edição de cardápio existente
+      const isEditingExistingCardapio = nomesCardapios.includes(cardapioName)
 
-      if (duplicates.length > 0) {
-        setError('Já existe alimentação cadastrada para pelo menos um dia selecionado neste cardápio')
-        setSaving(false)
-        return
-      }
-
-      await Promise.all(
-        itensSemana.map((item) =>
-          criarAlimentacaoPorHabitat(habitatId, {
-            cardapio: cardapioName,
-            diaSemana: item.diaSemana,
-            nome: item.nome,
+      if (isEditingExistingCardapio) {
+        // Modo edição: atualizar alimentações existentes
+        await Promise.all(
+          itensSemana.map((item) => {
+            const alimentacaoId = alimentacaoIdsPorDia[item.diaSemana as DiaSemana]
+            if (alimentacaoId) {
+              // Atualizar alimentação existente
+              return updateAlimentacao(alimentacaoId, {
+                cardapio: cardapioName,
+                diaSemana: item.diaSemana,
+                nome: item.nome,
+              })
+            } else {
+              // Criar nova alimentação se não existia para este dia
+              return criarAlimentacaoPorHabitat(habitatId, {
+                cardapio: cardapioName,
+                diaSemana: item.diaSemana,
+                nome: item.nome,
+              })
+            }
           })
         )
-      )
+      } else {
+        // Modo criação: validar duplicatas e criar novas alimentações
+        const duplicates = itensSemana.filter((item) =>
+          alimentacoes.some((a) => (a.cardapio || 'Cardápio Semanal').trim() === cardapioName && (a.diaSemana || '').trim() === item.diaSemana)
+        )
+
+        if (duplicates.length > 0) {
+          setError('Já existe alimentação cadastrada para pelo menos um dia selecionado neste cardápio')
+          setSaving(false)
+          return
+        }
+
+        await Promise.all(
+          itensSemana.map((item) =>
+            criarAlimentacaoPorHabitat(habitatId, {
+              cardapio: cardapioName,
+              diaSemana: item.diaSemana,
+              nome: item.nome,
+            })
+          )
+        )
+      }
 
       await loadAlimentacoes(habitatId)
-      setCardapioSelecionado(cardapioForm.cardapio.trim() || 'Cardápio Semanal')
+      setCardapioSelecionado(cardapioName)
 
       setShowCardapioModal(false)
       setCardapioForm(emptyCardapioForm)
       setSemanaAlimentacaoForm(emptySemanaAlimentacao)
+      setAlimentacaoIdsPorDia(
+        Object.fromEntries(diasSemanaOptions.map((d) => [d.value, null])) as Record<DiaSemana, number | null>
+      )
       setError(null)
     } catch (e) {
       setError(String(e))
@@ -532,7 +598,6 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
                           <tr>
                             <th>Dia da Semana</th>
                             <th>Alimentação do Dia</th>
-                            <th className="col-acoes">Ações</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -540,39 +605,6 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
                             <tr key={alimentacao.id}>
                               <td>{formatarDiaSemana(alimentacao.diaSemana)}</td>
                               <td className="font-weight-bold">{alimentacao.nome}</td>
-                              <td className="col-acoes">
-                                <div className="action-menu">
-                                  <button
-                                    className="action-btn"
-                                    onClick={() => setOpenMenuId(openMenuId === alimentacao.id ? null : alimentacao.id)}
-                                    title="Mais ações"
-                                  >
-                                    ⋯
-                                  </button>
-                                  {openMenuId === alimentacao.id && (
-                                    <div className="action-dropdown">
-                                      <button
-                                        className="action-item"
-                                        onClick={() => {
-                                          setOpenMenuId(null)
-                                          openEditAlimentacao(alimentacao)
-                                        }}
-                                      >
-                                        ✏️ Editar
-                                      </button>
-                                      <button
-                                        className="action-item danger"
-                                        onClick={() => {
-                                          setOpenMenuId(null)
-                                          handleDeleteAlimentacao(alimentacao.id)
-                                        }}
-                                      >
-                                        🗑️ Excluir
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -715,10 +747,7 @@ export default function HabitatAnimalsPage({ habitat, onBack }: HabitatAnimalsPa
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <select
                     value={cardapioForm.cardapio || ''}
-                    onChange={(e) => {
-                      const val = e.target.value
-                      setCardapioForm({ ...cardapioForm, cardapio: val })
-                    }}
+                    onChange={(e) => handleCardapioChange(e.target.value)}
                     style={{ flex: '0 0 220px' }}
                   >
                     <option value="">-- Novo cardápio --</option>
