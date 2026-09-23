@@ -397,9 +397,6 @@ export default function BioterioPage() {
           <button type="button" className="btn-secondary" onClick={() => navigate('/bioterio/anotacoes')}>
             Ver anotações
           </button>
-          <button className="btn-primary" onClick={handleCreateCaixaDireto} disabled={saving}>
-            + Nova Caixa
-          </button>
         </div>
       </div>
 
@@ -581,6 +578,13 @@ export default function BioterioPage() {
                 </td>
               </tr>
             ))}
+            <tr>
+              <td colSpan={6 + (exibirCampo('grupoFemeas') ? 1 : 0) + (exibirCampo('machosRotativos') ? 1 : 0) + (exibirCampo('crias') ? 1 : 0) + (exibirCampo('dataNascimento') ? 1 : 0) + (exibirCampo('dataDesmame') ? 1 : 0)} style={{ textAlign: 'center', padding: '16px' }}>
+                <button className="btn-primary" onClick={handleCreateCaixaDireto} disabled={saving} style={{ width: '100%' }}>
+                  + Nova Caixa
+                </button>
+              </td>
+            </tr>
           </tbody>
         </table>
         </div>
