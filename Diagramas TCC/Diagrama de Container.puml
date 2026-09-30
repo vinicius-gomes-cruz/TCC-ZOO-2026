@@ -8,18 +8,18 @@ Person(Administrador, "Administrador", "Gerencia usuários e acessa configuraç�
 
 ' Sistema e containers
 System_Boundary(Sistema, "Sistema de Gerenciamento do Zoológico") {
-    Container(WebApp, "Aplicação Web", "React + TypeScript (Vite)", "Interface web acessada via navegador;\ngerencia habitats e animais;\nresponsiva para desktop e mobile")
-    Container(API, "API Backend", "Spring Boot + Spring Data JPA", "Expõe endpoints REST para animais,\nhabitats e usuários;\nconfigura CORS via WebConfig")
-    Container(Analytics, "Serviço de Análise de Estoque", "Python + pandas", "Processa dados de estoque;\ngera métricas e previsões para apoio à decisão")
-    ContainerDb(DB, "Banco de Dados", "MySQL", "Armazena animais, habitats e usuários;\ntabelas de relacionamento para\nrequerimentos e enriquecimento ambiental")
+    Container(Nginx, "Servidor Web", "Nginx (Docker)", "Serve os arquivos estáticos da SPA e faz fallback para index.html")
+    Container(WebApp, "Aplicação Web (cliente)", "React + TypeScript (Vite)", "SPA compilada; consome a API via VITE_API_URL ou rota /api no desenvolvimento")
+    Container(API, "API Backend", "Spring Boot + Spring Data JPA", "Exposição de endpoints REST para animais, habitats, estoque, bioterio e usuários; autenticação JWT")
+    ContainerDb(DB, "Banco de Dados", "MySQL (docker)", "Persistência: animais, habitats, usuários, estoque, bioterio, caixas, tokens")
 }
 
 ' Relacionamentos
-Rel(Funcionario, WebApp, "Acessa via navegador (HTTPS)")
-Rel(Administrador, WebApp, "Acessa via navegador (HTTPS)")
+Rel(Funcionario, Nginx, "Acessa via navegador (HTTPS)")
+Rel(Administrador, Nginx, "Acessa via navegador (HTTPS)")
+Rel(Nginx, WebApp, "Serve arquivos estáticos e fallback SPA")
 Rel(WebApp, API, "Chamadas HTTP/JSON REST")
-Rel(API, DB, "Lê e escreve via JPA/Hibernate")
-Rel(Analytics, DB, "Lê dados operacionais e grava métricas/previsões")
-Rel(API, Analytics, "Dispara/consulta processamento analítico")
+Rel(API, DB, "Lê/Escreve via JPA/Hibernate")
+
 
 @enduml

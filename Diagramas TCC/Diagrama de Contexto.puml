@@ -9,8 +9,14 @@ Person(Administrador, "Administrador", "Administração do sistema")
 ' Sistema principal
 System(Sistema, "Sistema de Gerenciamento do Zoológico", "Gerencia animais, habitats e usuários do zoológico;\nacessado via navegador web")
 
+' Infraestrutura de implantação
+System_Ext(DockerHost, "Plataforma de Containers (Docker)", "Hospeda containers: Nginx, API e Banco de Dados")
+System_Ext(MySQL, "Banco de Dados MySQL", "Persistência de dados: animais, habitats, estoque, bioterio, usuários")
+
 ' Relacionamentos
-Rel(Funcionario, Sistema, "Cadastra e consulta animais e habitats")
+Rel(Funcionario, Sistema, "Cadastra e consulta animais, habitats e estoque")
 Rel(Administrador, Sistema, "Gerencia usuários e configurações do sistema")
+Rel(Sistema, DockerHost, "Executado em")
+Rel(Sistema, MySQL, "Armazena dados em")
 
 @enduml

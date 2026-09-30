@@ -6,14 +6,32 @@ title Diagrama de Componentes - API Backend (C3)
 Container_Boundary(API_Container, "API Backend - Spring Boot") {
 
     ' Controllers (camada de entrada REST)
-    Component(AnimalController, "AnimalController", "Recebe requisições REST para operações com animais\nGET /api/animais, POST, PUT, DELETE", "Spring MVC @RestController")
-    Component(HabitatController, "HabitatController", "Recebe requisições REST para operações com habitats\nGET /api/habitats, POST, PUT, DELETE", "Spring MVC @RestController")
-    Component(UsuarioController, "UsuarioController", "Recebe requisições REST para operações com usuários\nGET /api/usuarios, POST, PUT, DELETE", "Spring MVC @RestController")
+    Component(AnimalController, "AnimalController", "Endpoints para animais (GET/POST/PUT/DELETE)", "Spring MVC @RestController")
+    Component(HabitatController, "HabitatController", "Endpoints para habitats e anotações", "Spring MVC @RestController")
+    Component(UsuarioController, "UsuarioController", "Gerenciamento de usuários (CRUD)", "Spring MVC @RestController")
+    Component(AuthController, "AuthController", "Login/refresh token", "Spring MVC @RestController")
+    Component(CaixaController, "CaixaController", "Operações de caixa", "Spring MVC @RestController")
+    Component(EstoqueItemController, "EstoqueItemController", "Gerencia itens de estoque e anotações", "Spring MVC @RestController")
+    Component(EstoqueAnotacaoController, "EstoqueAnotacaoController", "Anotações de estoque por bioterio", "Spring MVC @RestController")
+    Component(BioterioAnotacaoController, "BioterioAnotacaoController", "Anotações do biotério", "Spring MVC @RestController")
+
+    ' Services
+    Component(UsuarioAuthService, "UsuarioAuthService", "Autenticação e criação de tokens JWT", "@Service")
+    Component(JwtService, "JwtService", "Geração e validação de JWTs", "Componente de segurança")
+    Component(RefreshTokenService, "RefreshTokenService", "Gerencia tokens de refresh", "@Service")
+    Component(AlimentacaoService, "AlimentacaoService", "Lógica de transferência/consumo de ração", "@Service")
+    Component(EstoqueItemService, "EstoqueItemService", "Lógicas de negócio sobre itens de estoque", "@Service")
 
     ' Repositories (camada de acesso a dados)
-    Component(AnimalRepository, "AnimalRepository", "Acesso a dados de animais; inclui consulta por habitat (findByHabitatId)", "Spring Data JPA")
+    Component(AnimalRepository, "AnimalRepository", "Acesso a dados de animais", "Spring Data JPA")
     Component(HabitatRepository, "HabitatRepository", "Acesso a dados de habitats", "Spring Data JPA")
     Component(UsuarioRepository, "UsuarioRepository", "Acesso a dados de usuários", "Spring Data JPA")
+    Component(CaixaRepository, "CaixaRepository", "Acesso a dados de caixas", "Spring Data JPA")
+    Component(EstoqueItemRepository, "EstoqueItemRepository", "Acesso a dados de itens de estoque", "Spring Data JPA")
+    Component(EstoqueAnotacaoRepository, "EstoqueAnotacaoRepository", "Anotações de estoque", "Spring Data JPA")
+    Component(BioterioEstoqueRepository, "BioterioEstoqueRepository", "Estoques por biotério", "Spring Data JPA")
+    Component(AlimentacaoRepository, "AlimentacaoRepository", "Registros de alimentações", "Spring Data JPA")
+    Component(RefreshTokenRepository, "RefreshTokenRepository", "Persistência de refresh tokens", "Spring Data JPA")
 
     ' Configuração
     Component(WebConfig, "WebConfig", "Configura CORS permitindo acesso do front-end", "Spring @Configuration")
@@ -21,14 +39,25 @@ Container_Boundary(API_Container, "API Backend - Spring Boot") {
 
 ContainerDb(DB, "Banco de Dados", "MySQL", "Tabelas: animal, habitat, usuario,\nhabitat_requerimentos, habitat_enriquecimentos")
 
-' Controllers chamam diretamente os repositories (sem camada de serviço)
-Rel(AnimalController, AnimalRepository, "Usa diretamente")
-Rel(AnimalController, HabitatRepository, "Busca habitat para vincular ao animal")
-Rel(HabitatController, HabitatRepository, "Usa diretamente")
-Rel(UsuarioController, UsuarioRepository, "Usa diretamente")
+Rel(AnimalController, AnimalRepository, "Usa")
+Rel(AnimalController, HabitatRepository, "Consulta habitat")
+Rel(HabitatController, HabitatRepository, "Usa")
+Rel(UsuarioController, UsuarioAuthService, "Usa para autenticação/registro")
+Rel(AuthController, UsuarioAuthService, "Usa para login e refresh")
+Rel(UsuarioAuthService, UsuarioRepository, "Acessa usuários")
+Rel(UsuarioAuthService, RefreshTokenRepository, "Lê/Grava tokens de refresh")
+Rel(EstoqueItemController, EstoqueItemService, "Usa")
+Rel(EstoqueItemService, EstoqueItemRepository, "Acessa dados")
+Rel(AlimentacaoService, AlimentacaoRepository, "Acessa dados de alimentações")
 
 Rel(AnimalRepository, DB, "Lê/Escreve")
 Rel(HabitatRepository, DB, "Lê/Escreve")
 Rel(UsuarioRepository, DB, "Lê/Escreve")
+Rel(CaixaRepository, DB, "Lê/Escreve")
+Rel(EstoqueItemRepository, DB, "Lê/Escreve")
+Rel(EstoqueAnotacaoRepository, DB, "Lê/Escreve")
+Rel(BioterioEstoqueRepository, DB, "Lê/Escreve")
+Rel(AlimentacaoRepository, DB, "Lê/Escreve")
+Rel(RefreshTokenRepository, DB, "Lê/Escreve")
 
 @enduml
