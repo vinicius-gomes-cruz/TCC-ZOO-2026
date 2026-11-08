@@ -2,6 +2,8 @@
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 title Diagrama de Componentes - API Backend (C3)
 
+LAYOUT_LEFT_RIGHT()
+
 ' Componentes dentro do container API
 Container_Boundary(API_Container, "API Backend - Spring Boot") {
 

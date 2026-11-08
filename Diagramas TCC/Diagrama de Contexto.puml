@@ -10,7 +10,7 @@ Person(Administrador, "Administrador", "Administração do sistema")
 System(Sistema, "Sistema de Gerenciamento do Zoológico", "Gerencia animais, habitats e usuários do zoológico;\nacessado via navegador web")
 
 ' Infraestrutura de implantação
-System_Ext(DockerHost, "Plataforma de Containers (Docker)", "Hospeda containers: Nginx, API e Banco de Dados")
+System_Ext(DockerHost, "Plataforma de Containers (Docker)", "Hospeda containers: API e Banco de Dados")
 System_Ext(MySQL, "Banco de Dados MySQL", "Persistência de dados: animais, habitats, estoque, bioterio, usuários")
 
 ' Relacionamentos

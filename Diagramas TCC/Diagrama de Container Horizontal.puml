@@ -10,16 +10,14 @@ Person(Administrador, "Administrador", "Gerencia usuários e acessa configuraç�
 
 ' Sistema e containers
 System_Boundary(Sistema, "Sistema de Gerenciamento do Zoológico") {
-    Container(Nginx, "Servidor Web", "Nginx (Docker)", "Serve os arquivos estáticos da SPA e faz fallback para index.html")
     Container(WebApp, "Aplicação Web (cliente)", "React + TypeScript (Vite)", "SPA compilada; consome a API via VITE_API_URL ou rota /api no desenvolvimento")
     Container(API, "API Backend", "Spring Boot + Spring Data JPA", "Expõe endpoints REST para animais, habitats, estoque, bioterio e usuários; autenticação JWT; configuração via WebConfig")
     ContainerDb(DB, "Banco de Dados", "MySQL (docker)", "Armazena animais, habitats, usuários, estoque, bioterio, caixas e tokens de refresh")
 }
 
 ' Relacionamentos
-Rel(Funcionario, Nginx, "Acessa via navegador (HTTPS)")
-Rel(Administrador, Nginx, "Acessa via navegador (HTTPS)")
-Rel(Nginx, WebApp, "Serve arquivos estáticos e fallback SPA")
+Rel(Funcionario, WebApp, "Acessa via navegador (HTTPS)")
+Rel(Administrador, WebApp, "Acessa via navegador (HTTPS)")
 Rel(WebApp, API, "Chamadas HTTP/JSON REST")
 Rel(API, DB, "Lê e escreve via JPA/Hibernate")
 
