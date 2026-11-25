@@ -1,0 +1,51 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+title Diagrama de Componentes - API REST e Regras de Negocio (C3)
+
+LAYOUT_TOP_DOWN()
+
+skinparam linetype ortho
+skinparam nodesep 35
+skinparam ranksep 50
+
+Container_Boundary(API_Controllers, "Camada REST - Spring MVC") {
+    Component(AnimalController, "AnimalController", "Endpoints REST", "CRUD de animais")
+    Component(HabitatController, "HabitatController", "Endpoints REST", "Habitats e anotações")
+    Component(UsuarioController, "UsuarioController", "Endpoints REST", "Gerenciamento de usuários")
+    Component(AuthController, "AuthController", "Endpoints REST", "Login e refresh token")
+    Component(CaixaController, "CaixaController", "Endpoints REST", "Operações de caixa")
+    Component(EstoqueItemController, "EstoqueItemController", "Endpoints REST", "Itens e anotações de estoque")
+    Component(EstoqueAnotacaoController, "EstoqueAnotacaoController", "Endpoints REST", "Anotações de estoque")
+    Component(BioterioAnotacaoController, "BioterioAnotacaoController", "Endpoints REST", "Anotações do biotério")
+
+    AnimalController -[hidden]down-> HabitatController
+    HabitatController -[hidden]down-> UsuarioController
+    UsuarioController -[hidden]down-> AuthController
+    AuthController -[hidden]down-> CaixaController
+    CaixaController -[hidden]down-> EstoqueItemController
+    EstoqueItemController -[hidden]down-> EstoqueAnotacaoController
+    EstoqueAnotacaoController -[hidden]down-> BioterioAnotacaoController
+}
+
+Container_Boundary(API_Services, "Camada de Serviços e Segurança") {
+    Component(UsuarioAuthService, "UsuarioAuthService", "Autenticação e registro", "@Service")
+    Component(JwtService, "JwtService", "Geração e validação de JWT", "Segurança")
+    Component(RefreshTokenService, "RefreshTokenService", "Gerenciamento de refresh tokens", "@Service")
+    Component(AlimentacaoService, "AlimentacaoService", "Transferência e consumo de ração", "@Service")
+    Component(EstoqueItemService, "EstoqueItemService", "Regras de itens de estoque", "@Service")
+    Component(WebConfig, "WebConfig", "Configuração HTTP", "CORS")
+
+    UsuarioAuthService -[hidden]down-> JwtService
+    JwtService -[hidden]down-> RefreshTokenService
+    RefreshTokenService -[hidden]down-> AlimentacaoService
+    AlimentacaoService -[hidden]down-> EstoqueItemService
+    EstoqueItemService -[hidden]down-> WebConfig
+}
+
+Rel(UsuarioController, UsuarioAuthService, "Usa")
+Rel(AuthController, UsuarioAuthService, "Usa")
+Rel(EstoqueItemController, EstoqueItemService, "Usa")
+Rel(UsuarioAuthService, JwtService, "Gera e valida tokens")
+Rel(UsuarioAuthService, RefreshTokenService, "Gerencia refresh")
+
+@enduml

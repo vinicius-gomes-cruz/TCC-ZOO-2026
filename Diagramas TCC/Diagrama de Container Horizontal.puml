@@ -12,7 +12,7 @@ Person(Administrador, "Administrador", "Gerencia usuários e acessa configuraç�
 System_Boundary(Sistema, "Sistema de Gerenciamento do Zoológico") {
     Container(WebApp, "Aplicação Web (cliente)", "React + TypeScript (Vite)", "SPA compilada; consome a API via VITE_API_URL ou rota /api no desenvolvimento")
     Container(API, "API Backend", "Spring Boot + Spring Data JPA", "Expõe endpoints REST para animais, habitats, estoque, bioterio e usuários; autenticação JWT; configuração via WebConfig")
-    ContainerDb(DB, "Banco de Dados", "MySQL (docker)", "Armazena animais, habitats, usuários, estoque, bioterio, caixas e tokens de refresh")
+    ContainerDb(DB, "Banco de Dados", "MySQL", "Armazena animais, habitats, usuários, estoque, bioterio, caixas e tokens de refresh")
 }
 
 ' Relacionamentos
